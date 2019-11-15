@@ -1,5 +1,5 @@
-# MAGNETO
-MAGNETO = Multiple graph AliGNmEnt TOol via Bron Kerbosch and VF2 algorithms
+# MIGRAINE
+MIGRAINE = MultIple GRaph AlIgNmEnt tool via Bron Kerbosch and VF2 algorithms
 
 ## General description
 A python3-based tool that takes multiple graph objects and aligns them in a progressive way using either Bron-Kerbosch or VF2 algorithm.
