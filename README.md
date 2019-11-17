@@ -9,6 +9,10 @@ A python3-based tool that takes multiple graph objects and aligns them in a prog
     * Two or more graphs in either JSON, GRAPHML or the tool-specific GRAPH format.
   * Output:
     * A multiple graph matching in GRAPHML format.
+    
+## Install
+
+```git clone https://github.com/Tschichen/MIGRAINE.git```
 
 ## Input examples
 * minimum input  
