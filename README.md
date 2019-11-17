@@ -12,7 +12,7 @@ A python3-based tool that takes multiple graph objects and aligns them in a prog
     
 ## Installation
 
-```git clone https://github.com/Tschichen/MIGRAINE.git
+```git clone https://github.com/Tschichen/MIGRAINE.git```
 
 ## Input examples
 * minimum input  
