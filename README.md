@@ -9,10 +9,6 @@ A python3-based tool that takes multiple graph objects and aligns them in a prog
     * Two or more graphs in either JSON, GRAPHML or the tool-specific GRAPH format.
   * Output:
     * A multiple graph matching in GRAPHML format.
-    
-## Installation
-
-```git clone https://github.com/Tschichen/MIGRAINE.git```
 
 ## Input examples
 * minimum input  
@@ -30,6 +26,8 @@ A python3-based tool that takes multiple graph objects and aligns them in a prog
 
 ## Options
 
+Note: Clique option only available for BK. Unconnected directed graphs can only be assessed via BK algorithm. Input graphs must be all directed or undirected.
+
 option| explanation
 ------------ | -------------
 --graphgen | starts built in tool, that builds (multiple) randomly created graphs. Graph properties like node count, edge probability or random labels need to be customized.  
@@ -43,11 +41,11 @@ option| explanation
 -f or --forbidden |	while inputting a scoring list, score via size of largest common subgraph after excluding forbidden label matches.
 -g or --labelling <string> | String can be "nodes", "edges" or "both". Defines what labels should be used for scoring.
 -n or --newick <newick-file> | Input a guide tree for multiple alignment in newick format. If this option is not enabled the guide tree is built from scores computed via pairwise alignment.
--r or --randomt | Saves a randomly generated guide tree for your current run. 
--t or --showt | shows the guide tree generated from scores in a pop up window.
+-r or --randomt | saves a randomly generated guide tree for your current run
+-t or --showt | saves the generated guide tree as .png
 -q or --savetn | saves the generated guide tree as newick file
 -m <string> | saves the multiple alignment as GRAPHML file. Options for string are: "end" only end result will be saved, "all" saves every matching after one graph is added to the alignment till the end. _Default: end_
--d or --drawm | shows a visualization of the multiple graph alignment
+-d or --drawm | saves a visualization of the multiple graph alignment as .png
 
 	
 ## Required Python libraries
@@ -127,19 +125,3 @@ option| explanation
     2
 
 in the example, a match between a node labeled with "N" and a node labeled with  "H" would be forbidden, score between edge labels "s" and "i" would be 3.
-
-### Explanation of the Output 
-
-At the end of the MGA the final matching object is printed. For each node of the final matching graph, the node with the following informations is outputted:
-
-#### nodes
-('node_name', {'Label': 'node_label', 'Graph': 'graph_name', 'Matches': [None, ('node_name_matched_node', 'Label_of_matched_node', 'Graph_name_matched_node'), None]})
-
-The node name is the name of the node that was first added to the matching object. 
-'None' in the "Matches" list indicates that this node is not part of the common subgraph in this alignment step.
-
-#### edges
-(node1_graph1, node2_graph1, {'Label': edge_label, 'Graph': 'graph_name', 'Matches': [('matched_edge', label_matched_edge, 'Graph name matched edge'), None, None]})
-
-The edge is indicated by the head and tail nodes of the edge. The edge name represents the name of the edge that was first added to the matching object. 
-'None' in the "Matches" list indicates that this edge is not part of the common subgraph in this alignment step.
