@@ -30,7 +30,7 @@ A python3-based tool that takes multiple graph objects and aligns them in a prog
 
 ## Options
 
-Note: Clique option only available for BK. Unconnected directed graphs can only be assessed via BK algorithm. Input graphs must be all directed or undirected.
+Note: Clique option only available for BK. Disconnected directed graphs can only be assessed via BK algorithm. Input graphs must be all directed or undirected.
 
 option| explanation
 ------------ | -------------
