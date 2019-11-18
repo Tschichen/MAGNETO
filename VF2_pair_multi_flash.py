@@ -884,7 +884,7 @@ class VF2_GraphAligner(object):
         plt.savefig(file)
         plt.clf()
 
-    def report_score(self):  # brauchen wir das?
+    def report_score(self): 
         if self.scores:
             return (self.scores[-1])
         else:
