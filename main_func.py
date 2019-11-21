@@ -17,10 +17,9 @@ import graph_gen as gg
 
 
 def main(argv):
-
     vf2 = True  # use vf2 algorithm
     pre_clique = False  # using a predefined clique
-    windows = True  # catch exceptions if not used under windows
+    windows = False  # catch exceptions if not used under windows
     scoring_for = "both"
     save_graphs = "end"
     forbidden = False
@@ -97,8 +96,8 @@ def main(argv):
             exit()
 
         if opt == '-i':
-            if "/" in arg:
-                windows = False
+            if sys.platform == "win32":
+                windows = True
             if arg.endswith("\\") or arg.endswith("/"):
                 graph_loc = arg
             else:
