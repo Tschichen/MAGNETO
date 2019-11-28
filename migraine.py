@@ -637,7 +637,7 @@ def main(argv):
             print("Could not write to " + ml_path + " !")
 
         matches = path + name + "_matches.txt"
-        GraphIO.write_matches(m, matches)
+        GraphIO.write_matches(m.network, matches)
 
 
     # Multiple Graph Alignment via VF2.
@@ -669,18 +669,16 @@ def main(argv):
             GraphIO.write_graphML_file(mga, ml_path)
             print("Saved Final Matching as Graphml")
             matches = path + name + "_matches.txt"
-            MList = multiple_aligner.convert_mga_to_list(mga)
-            EList = multiple_aligner.convert_mga_to_edgelist(mga)
-            GraphIO.write_vf2_results(mga, MList, EList, matches)
+            GraphIO.write_matches(mga, matches)
 
 
             # Save visualization of final graph alignment as PNG file.
             if '-d' in all_opts or '--drawm' in all_opts:
                 png_matching = path + name + "_matching.png"
                 if nodes_labelled:
-                    multiple_aligner.output_generator(mga, "label", png_matching)
+                    multiple_aligner.output_generator(mga, drawing_order, "label", png_matching)
                 else:
-                    multiple_aligner.output_generator(mga, "nolabel", png_matching)
+                    multiple_aligner.output_generator(mga, drawing_order, "nolabel", png_matching)
                 print("Saved Matching as PNG")
 
             time_vf2_mult = time.time() - time_vf22
