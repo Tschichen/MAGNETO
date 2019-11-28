@@ -224,7 +224,11 @@ class Matching():
     def add_nodes_to_alignment(self, matching_b, max_clique):
         """Help function that addes nodes and edges to the matching object according to the found max_clique.
 
-            If node of matching b is in max_clique, then the node is added to the 'Matches' array of the corresponding node from self matching object. Otherwise a new node is appended to the matching object. Edges are added in the same way. The labels correspond to the label of the first node or edge added to the matching object. If a node or edge of the self matching object are not part of the matching clique, None is added to the 'Matches' array.
+            If node of matching b is in max_clique, then the node is added to the 'Matches' array of the corresponding
+            node from self matching object. Otherwise a new node is appended to the matching object. Edges are added in
+            the same way. The labels correspond to the label of the first node or edge added to the matching object.
+            If a node or edge of the self matching object are not part of the matching clique, None is added to
+            the 'Matches' array.
         """
         matched_nodes_matching_b = []
         len_matches_nodes = 0

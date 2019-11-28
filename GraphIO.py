@@ -331,10 +331,12 @@ class GraphIO():
 
 
     def write_matches(matching, path):
-        """Function that takes a path to an output file and generates a MATCHING file with the nodes and edges of the final matching object.
+        """Function that takes a path to an output file and generates a MATCHING file with the nodes and edges of the
+        final matching object.
         """
-        matching_obj = "#Nodes\n"
+
         try:
+            matching_obj = "#Nodes\n"
             for node in matching.network.nodes(data=True):
                 matching_obj += 'Node;' + node[0] + '\nLabel;' + str(node[1]['Label']) + '\nGraph;' + str(node[1][
                                                                                                               'Graph']) + '\nMatches;'
@@ -359,10 +361,12 @@ class GraphIO():
                 matching_obj += "\n\n"
 
         except AttributeError:
+            matching_obj = "#Node matching\n"
+
             for node in matching.nodes(data=True):
                 matching_obj += 'Node;' + node[0] + '\nLabel;' + str(node[1]['Label']) + '\nGraph;' + str(node[1][
                                                                                                               'Graph']) + '\nMatches;'
-                for match in node[1]['Matching']:
+                for match in node[1]['Matches']:
                     if match != '-':
                         triple = "(" + str(match) + ")"
                     else:
@@ -374,7 +378,7 @@ class GraphIO():
             for edge in matching.edges(data=True):
                 matching_obj += 'Edge;' + edge[0] + ";" + edge[1] + '\nLabel;' + str(edge[2]['Label']) + '\nGraph;' + \
                                 str(edge[2]['Graph']) + '\nMatches;'
-                for match in edge[2]['Matching']:
+                for match in edge[2]['Matches']:
                     if match != '-':
                         quadruple = "(" + str(match[0]) + "," + str(match[1]) + "," + str(match[2]) + ")"
                     else:
@@ -384,3 +388,37 @@ class GraphIO():
 
         with open(path, 'w') as save_matches:
             save_matches.write(matching_obj)
+
+
+    def write_vf2_results(mga, mlist, elist, path):
+        matching_obj = "#Node matching\n"
+
+        graphnames = []
+        for nodename in mlist[0]:
+            header = nodename[0].split("_", -1)[0]
+            graphnames.append(header)
+
+        for gname in graphnames:
+            matching_obj += gname.rjust(20) + '\t'
+        matching_obj += '\n\n'
+
+        for matches in mlist:
+            for match in matches:
+                matching_obj += str(match).rjust(20) + '\t'
+            matching_obj += '\n'
+
+        matching_obj += '\n\n\n'
+
+        matching_obj += "Edge matching\n"
+        for gname in graphnames:
+            matching_obj += gname.rjust(30) + '\t'
+        matching_obj += '\n\n'
+
+        for ematches in elist:
+            for edge in ematches:
+                matching_obj += str(edge).rjust(30) + '\t'
+            matching_obj += '\n\n'
+
+        with open(path, 'w') as save_matches:
+            save_matches.write(matching_obj)
+

@@ -1,6 +1,7 @@
 import networkx as nx
 import math
 import matplotlib.pyplot as plt
+import inspect
 import collections
 import pprint
 import random
@@ -309,7 +310,7 @@ class DirGraphAlign(object):
         print("Some labels on your graph have not been found in the scoring list. Default Score: 0")
         return 0
 
-    def cliques_iter(self):
+    def alig_iter(self):
         """Initialize aligner-object and return list with possible alignments"""
         self.initialize()
         allResults = [alig for alig in self.matcher() if alig != 0]
@@ -516,7 +517,7 @@ class VF2_GraphAligner(object):
 
         try:
             if nx.is_connected(G1) and nx.is_connected(G2):
-                paired_result = self.find_match(G1, gG2, self.node_score_list, self.edge_score_list,
+                paired_result = self.find_match(G1, G2, self.node_score_list, self.edge_score_list,
                                            forbidden=forbidden)
             else:
                 paired_result = self.disconnected_alig(G1, G2, self.node_score_list, self.edge_score_list,
@@ -575,6 +576,20 @@ class VF2_GraphAligner(object):
                 G2.edges[edge]['Label'] = None
             else:
                 continue
+        for node in G1.nodes():
+            try:
+                G1.nodes[node]['Label']
+            except:
+                G1.nodes[node]['Label'] = None
+            else:
+                continue
+        for node in G2.nodes():
+            try:
+                G2.nodes[node]['Label']
+            except:
+                G2.nodes[node]['Label'] = None
+            else:
+                continue
 
     def find_match(self, G1, G2, node_score_list=False, edge_score_list=False, save_all=False, forbidden=False):
         """Create a DirGraphAlign object and generate alignment of input graphs.
@@ -591,7 +606,7 @@ class VF2_GraphAligner(object):
 
         if node_score_list:
             alignment = DirGraphAlign(inGraph1, inGraph2, node_score_list,forbid=forbidden)
-            all_alignments = alignment.cliques_iter()
+            all_alignments = alignment.alig_iter()
             if len(all_alignments) > 1:
                 selected_alignment = alignment.process_results(all_alignments)
                 self.mappings.append(selected_alignment[1])
@@ -602,15 +617,17 @@ class VF2_GraphAligner(object):
 
         else:
             alignment = DirGraphAlign(inGraph1, inGraph2)
-            all_alignments = alignment.cliques_iter()
+            all_alignments = alignment.alig_iter()
             if len(all_alignments) > 1:
                 selected_alignment = alignment.process_results(all_alignments)
                 self.mappings.append(selected_alignment)
             else:
                 self.mappings.append(all_alignments[0])
 
-        self.add_matches_to_nodes(self.mappings[-1], inGraph1, inGraph2)
-        self.add_matches_to_edges(self.mappings[-1], inGraph1, inGraph2)
+        pair_or_mult = inspect.currentframe().f_back.f_code.co_name
+        if pair_or_mult == "vf2mult":
+            self.add_matches_to_nodes(self.mappings[-1], inGraph1, inGraph2)
+            self.add_matches_to_edges(self.mappings[-1], inGraph1, inGraph2)
         graphAlignment = self.build_matched_graph(self.mappings[-1], inGraph1, inGraph2)
         if save_all:
             GraphIO.write_graphML_file(graphAlignment, save_all)
@@ -660,7 +677,7 @@ class VF2_GraphAligner(object):
 
                 if node_score_list:
                     disc_alignment = DirGraphAlign(inGraph1, inGraph2, node_score_list, forbid=forbidden)
-                    all_alignments = disc_alignment.cliques_iter()
+                    all_alignments = disc_alignment.alig_iter()
                     if len(all_alignments) > 1:
                         selected_alignment = disc_alignment.process_results(all_alignments)
                         mapping_list.append(selected_alignment[1])
@@ -670,7 +687,7 @@ class VF2_GraphAligner(object):
                         score_list.append(all_alignments[0][0])
                 else:
                     disc_alignment = DirGraphAlign(inGraph1, inGraph2)
-                    all_alignments = disc_alignment.cliques_iter()
+                    all_alignments = disc_alignment.alig_iter()
                     if len(all_alignments) > 1:
                         selected_alignment = disc_alignment.process_results(all_alignments)
                         mapping_list.append(selected_alignment)
@@ -709,9 +726,10 @@ class VF2_GraphAligner(object):
                 for score in score_list:
                     scoresum += score
                 self.scores.append(scoresum)
-
-            self.add_matches_to_nodes(self.mappings[-1], G1, G2)
-            self.add_matches_to_edges(self.mappings[-1], G1, G2)
+            pair_or_mult = inspect.currentframe().f_back.f_code.co_name
+            if pair_or_mult == "vf2mult":
+                self.add_matches_to_nodes(self.mappings[-1], G1, G2)
+                self.add_matches_to_edges(self.mappings[-1], G1, G2)
             graphAlignment = self.build_matched_graph(self.mappings[-1], G1, G2)
             if save_all:
                 GraphIO.write_graphML_file(graphAlignment, save_all)
@@ -721,41 +739,67 @@ class VF2_GraphAligner(object):
 
     def add_matches_to_nodes(self, mapping, G1, G2):
         """Add matched nodes as a dict to the nodes of the input graphs."""
-
         for node in G1:
             if node in mapping:
                 try:
-                    alreadyMatched = G1.nodes[node]['Matching']
+                    alreadyMatched = G1.nodes[node]['Matches']
                 except:
-                    matches = []
-                    matches.extend([node, mapping[node]])
-                    G1.nodes[node]['Matching'] = matches
+                    matched_nodes = []
+                    matched_nodes.extend([node, mapping[node]])
+                    G1.nodes[node]['Matches'] = matched_nodes
                 else:
                     alreadyMatched.append(mapping[node])
-                    G1.nodes[node]['Matching'] = alreadyMatched
+                    G1.nodes[node]['Matches'] = alreadyMatched
+
+                #for listing of node labels
+                try:
+                    already_labelled = G1.nodes[node]['Labelmatches']
+                except:
+                    matched_labels = []
+                    matched_node_label = G2.nodes[mapping[node]]['Label']
+                    matched_labels.extend([G1.nodes[node]['Label'], matched_node_label])
+                    G1.nodes[node]['Labelmatches'] = matched_labels
+                else:
+                    already_labelled.append(G2.nodes[mapping[node]]['Label'])
+                    G1.nodes[node]['Labelmatches'] = already_labelled
 
             else:
                 try:
-                    alreadyMatched = G1.nodes[node]['Matching']
+                    alreadyMatched = G1.nodes[node]['Matches']
                 except:
-                    matches = []
-                    matches.append(node)
-                    matches.append('-')
-                    G1.nodes[node]['Matching'] = matches
+                    matched_nodes = []
+                    matched_nodes.append(node)
+                    matched_nodes.append('-')
+                    G1.nodes[node]['Matches'] = matched_nodes
                 else:
                     alreadyMatched.append('-')
-                    G1.nodes[node]['Matching'] = alreadyMatched
+                    G1.nodes[node]['Matches'] = alreadyMatched
 
-        maplen = len(G1.nodes[node]['Matching'])
+                #for listing of labels
+                try:
+                    already_labelled = G1.nodes[node]['Labelmatches']
+                except:
+                    matched_labels = []
+                    matched_labels.append(G1.nodes[node]['Label'])
+                    matched_labels.append('-')
+                    G1.nodes[node]['Labelmatches'] = matched_labels
+                else:
+                    already_labelled.append('-')
+                    G1.nodes[node]['Labelmatches'] = already_labelled
+
+        maplen = len(G1.nodes[node]['Matches'])
 
         for node2 in G2:
             if node2 not in mapping.values():
                 maplist = ["-"] * (maplen - 1)
                 maplist.append(node2)
-                G2.nodes[node2]['Matching'] = maplist
+                G2.nodes[node2]['Matches'] = maplist
+                labellist = ['-']*(maplen-1)
+                labellist.append(G2.nodes[node2]['Label'])
+                G2.nodes[node2]['Labelmatches'] = labellist
 
     def add_matches_to_edges(self, mapping, G1, G2):
-        """Add matched adges to edges of input graphs."""
+        """Add matched edges to edges of input graphs."""
         edge_mapping = {}
 
         # for Graph1
@@ -773,37 +817,37 @@ class VF2_GraphAligner(object):
                 matched_edge_construct = (matched_tail, matched_head, matched_edge_label)
                 edge_mapping[edge_ident] = matched_edge_construct
                 try:
-                    already_matched = G1[tail_node][head_node]['Matching']
+                    already_matched = G1[tail_node][head_node]['Matches']
                 except:
-                    matches = []
-                    matches.extend([edge_construct, matched_edge_construct])
-                    G1[tail_node][head_node]['Matching'] = matches
+                    matched = []
+                    matched.extend([edge_construct, matched_edge_construct])
+                    G1[tail_node][head_node]['Matches'] = matched
 
                 else:
                     already_matched.append(matched_edge_construct)
-                    G1[tail_node][head_node]['Matching'] = already_matched
+                    G1[tail_node][head_node]['Matches'] = already_matched
 
             # case: tail or head is not in mapping
             else:
                 try:
-                    already_matched = G1[tail_node][head_node]['Matching']
+                    already_matched = G1[tail_node][head_node]['Matches']
                 except:
-                    matches = []
-                    matches.append(edge_construct)
-                    matches.append('-')
-                    G1[tail_node][head_node]['Matching'] = matches
+                    matched = []
+                    matched.append(edge_construct)
+                    matched.append('-')
+                    G1[tail_node][head_node]['Matches'] = matched
                 else:
                     already_matched.append('-')
-                    G1[tail_node][head_node]['Matching'] = already_matched
+                    G1[tail_node][head_node]['Matches'] = already_matched
 
-            maplen = len(G1[tail_node][head_node]['Matching'])
+            maplen = len(G1[tail_node][head_node]['Matches'])
 
             # for Graph2:
         for edge2 in G2.edges(data=True):
             if edge2 not in edge_mapping.values():
                 maplist = ["-"] * (maplen - 1)
                 maplist.append([edge2[0], edge2[1], edge2[2]['Label']])
-                G2[edge2[0]][edge2[1]]['Matching'] = maplist
+                G2[edge2[0]][edge2[1]]['Matches'] = maplist
 
     def build_matched_graph(self, mapping, G1, G2):
         """Build a new graph from mapping."""
@@ -821,9 +865,9 @@ class VF2_GraphAligner(object):
         for edge in G2.edges():
             node1 = edge[0]
             node2 = edge[1]
-            if ((node1 not in mapping) and (node1 not in mapping.values())):
+            if (node1 not in mapping) and (node1 not in mapping.values()):
                 # both nodes are not in mapping
-                if ((node2 not in mapping.values()) and (node2 not in mapping)):
+                if (node2 not in mapping.values()) and (node2 not in mapping):
                     # ga.add_edge(node1, node2)
                     edgeattr = G2.edges[node1, node2]
                     ga.add_edge(edge[0], edge[1], **edgeattr)
@@ -835,7 +879,6 @@ class VF2_GraphAligner(object):
                             edgeattr = G2.edges[edge]
                             ga.add_edge(node1, k, **edgeattr)
 
-
             elif (node2 not in mapping.values()) and (node2 not in mapping):
                 for ke,val in mapping.items():
                     if val == node1:
@@ -844,25 +887,27 @@ class VF2_GraphAligner(object):
 
         return (ga)
 
-    def output_generator(self, mga, file):
+    def output_generator(self, mga, has_label, file):
         """Prepare lists of the mapping and if desired a graphical representation of the alignment."""
         pos = nx.spring_layout(mga)
         nodelist_complete_match = []
         nodelist_else = []
         edgelist_complete_match = []
         edgelist_else = []
+        nodenames = {}
         nodelabels = {}
+
         for node in mga.nodes(data=True):
             node_name = node[0]
-            nodelabels[node_name] = node[1]['Matching']
-
-            if '-' in nodelabels[node_name]:
+            nodenames[node_name] = node[1]['Matches']
+            nodelabels[node_name] = node[1]['Labelmatches']
+            if '-' in nodenames[node_name]:
                 nodelist_else.append(node[0])
             else:
                 nodelist_complete_match.append(node[0])
 
         for edge in mga.edges(data=True):
-            if '-' in edge[2]['Matching']:
+            if '-' in edge[2]['Matches']:
                 edgelist_else.append(edge)
             else:
                 edgelist_complete_match.append(edge)
@@ -877,14 +922,17 @@ class VF2_GraphAligner(object):
         nx.draw_networkx_nodes(mga, pos, nodelist_complete_match, node_color='r', node_size=500, alpha=0.8)
         nx.draw_networkx_nodes(mga, pos, nodelist_else, node_color='g', node_size=300, alpha=0.8)
         nx.draw_networkx_edges(mga, pos, edgelist_complete_match, width=3, alpha=0.5, edge_color='r')
-        nx.draw_networkx_edges(mga, pos, edgelist_else, width=3, alpha=0.5, edge_color='g')
-        nx.draw_networkx_labels(mga, pos, nodelabels, font_size=12)
+        nx.draw_networkx_edges(mga, pos, edgelist_else, width=3, alpha=0.5, edge_color='b')
+        if has_label == "nolabel":
+            nx.draw_networkx_labels(mga, pos, nodenames, font_size=12)
+        else:
+            nx.draw_networkx_labels(mga, pos, nodelabels, font_size=12)
         plt.axis('off')
         #plt.show()
         plt.savefig(file)
         plt.clf()
 
-    def report_score(self): 
+    def report_score(self):
         if self.scores:
             return (self.scores[-1])
         else:
@@ -893,20 +941,20 @@ class VF2_GraphAligner(object):
     def convert_mga_to_list(self, mga):
         MList = []
         for node in mga.nodes:
-            try:
-                matches = mga.nodes[node]['Matching']
-            except:
-                matches = 'an error occurred here'
-            MList.append(matches)
+            matches = mga.nodes[node]['Matches']
+            matchedlabels = mga.nodes[node]['Labelmatches']
+            nodes_and_labels = []
+            howmany = len(matches)
+            for i in range(howmany):
+                kombi = [matches[i], matchedlabels[i]]
+                nodes_and_labels.append(kombi)
+            MList.append(nodes_and_labels)
         return (MList)
 
     def convert_mga_to_edgelist(self, mga):
         edge_list = []
         for edge in mga.edges:
-            try:
-                matches = mga.edges[edge]['Matching']
-            except:
-                matches = 'error in matching'
+            matches = mga.edges[edge]['Matches']
             edge_list.append(matches)
         return (edge_list)
 
