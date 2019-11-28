@@ -2,10 +2,7 @@ import networkx as nx
 import math
 import matplotlib.pyplot as plt
 import inspect
-import collections
-import pprint
 import random
-from operator import itemgetter
 from GraphIO import GraphIO
 
 
@@ -109,11 +106,11 @@ class DirGraphAlign(object):
         T1_out = [node for node in self.out_1 if node not in self.core_1]
         T2_out = [node for node in self.out_2 if node not in self.core_2]
 
-        # If T1_out and T2_out are not empty:
-        # P(s) = T1_out x {min T2_out}
+        # If T1_out and T2_out contain nodes:
+        # P(s) = T1_out x min (T2_out)
         if T1_out and T2_out:
             node_2 = min(T2_out, key=min_key)
-            # node_2 = random.choice(T2_out)
+            # node_2 = alternative?
             for node_1 in T1_out:
                 if self.label_match(node_1, node_2):
                     pair = tuple((node_1, node_2))
@@ -126,11 +123,11 @@ class DirGraphAlign(object):
             T1_in = [node for node in self.in_1 if node not in self.core_1]
             T2_in = [node for node in self.in_2 if node not in self.core_2]
 
-            # If T1_in and T2_in are not empty:
-            # P(s) = T1_out x {min T2_out}
+            # If T1_in and T2_in contain nodes:
+            # P(s) = T1_out x min (T2_out)
             if T1_in and T2_in:
                 node_2 = min(T2_in, key=min_key)
-                # node_2 = random.choice(T2_in)
+                # node_2 = alternative?
                 for node_1 in T1_in:
                     if self.label_match(node_1, node_2):
                         pair = tuple((node_1, node_2))
@@ -139,11 +136,11 @@ class DirGraphAlign(object):
                     yield None
 
             # In case all terminal sets are empty:
-            # P(s) = (N_1 - M_1) x {min (N_2 - M_2)}
+            # P(s) = (N_1 - M_1) x (min (N_2 - M_2))
             elif (len(self.core_2) != len(G2_nodes)):
                 node_2 = min(G2_nodes - set(self.core_2), key=min_key)
                 #Ps = list(G2_nodes - set(self.core_2))
-                #node_2 = random.choice(Ps)
+                #node_2 = alterantive function?
                 for node_1 in G1_nodes:
                     if node_1 not in self.core_1:
                         if self.label_match(node_1, node_2):
@@ -197,14 +194,17 @@ class DirGraphAlign(object):
 
     def syntactic_feas(self, G1_node, G2_node):
         """Return True if the addition of G1_node and G2_node lead to a common induced subgraph of G1 and G2.
-        """
 
+        Parameters:
+        G1_node : node from G1 that is tested for matching with G2_node from G2
+        G2_node : node from G2 that is tested for matching with G1_node from G1
+        """
 
         # check self loops
         if self.G1.number_of_edges(G1_node, G1_node) != self.G2.number_of_edges(G2_node, G2_node):
             return False
 
-        # For each predecessor n' of n in the partial mapping, the
+        # For each predecessor n' of n in the mapping, the
         # corresponding node m' is a predecessor of m, and vice versa. Also,
         # the number of edges must be equal.
         for predecessor in self.G1.pred[G1_node]:
@@ -229,7 +229,7 @@ class DirGraphAlign(object):
                                                                                                            G2_node):
                     return False
 
-        # For each successor n' of n in the partial mapping, the corresponding
+        # For each successor n' of n in the mapping, the corresponding
         # node m' is a successor of m, and vice versa. Also, the number of
         # edges must be equal.
         for successor in self.G1[G1_node]:
@@ -258,7 +258,15 @@ class DirGraphAlign(object):
         return True
 
     def label_match(self, G1_node, G2_node):
-        """Check if labels of node match, in case label comparison is desired"""
+        """Check if labels of node match, in case label comparison is desired
+
+        Parameters:
+        G1_node : node from G1
+        G2_node : node from G2
+
+        Returns:
+        returns True if Labels are not forbidden matches
+        """
         if not self.evalNodeAttr:
             return True
         label1 = self.G1.nodes[G1_node]['Label']
@@ -310,14 +318,21 @@ class DirGraphAlign(object):
         print("Some labels on your graph have not been found in the scoring list. Default Score: 0")
         return 0
 
-    def alig_iter(self):
+    def alig_lister(self):
         """Initialize aligner-object and return list with possible alignments"""
         self.initialize()
         allResults = [alig for alig in self.matcher() if alig != 0]
         return (allResults)
 
     def process_results(self, results):
-        """Prune short and low-scored alignments from the result list """
+        """Prune short and low-scored alignments from the result list
+
+        Parameters
+        results : a list of possible mappings
+
+        Returns
+        Returns one mapping of maximal length
+        """
         if self.node_score_list and not self.forbidden:
             max_len_alig = max(results, key=lambda x : len(x[1]))
             cutoffScore = max_len_alig[0]
@@ -363,15 +378,22 @@ class DirGraphAlign(object):
 class MappingState(object):
     """Internal representation of state for the DirGraphAlign class.
 
+    Attrbutes
+    GM: The DirGraphAlign object
+    statenumber: in case the user wants to keep track of the states
+    G1_node: the node from G1 that was matched to G2_node and last added to the mapping
+    G2_node: the node from G2 that was matched to G1_node and last added to the mapping
+    depth: the depth of the search tree, indicated by the length of the mapping
+
+    Methods
+    restore : when the mapping cannot be extended, the MappingState object is reset to the values before the last pair
+    of nodes was added
+
     This class is used only to store state specific data.
     """
 
     def __init__(self, GM, statenumber, G1_node=None, G2_node=None):
-        """Initializes DiGMState object.
-        Pass in the DirGraphAlign to which this DiGMState belongs and the
-        new node pair that will be added to the GraphAligner's current
-        isomorphism mapping.
-        """
+        """Initializes MappingState object."""
         self.GM = GM
         self.statenumber = statenumber
 
@@ -465,7 +487,35 @@ class MappingState(object):
 
 
 class VF2_GraphAligner(object):
-    """Class to generate paired and multiple alignments of graphs from user input."""
+    """Class to generate paired and multiple alignments of graphs from user input.
+
+    Attributes
+    graph_list:
+    graph_dict:
+    node_score_list:
+    edge_score_list:
+    mappings:
+    scores:
+    length:
+    edge_scores:
+
+    Methods
+    vf2mult:
+    vf2_pga:
+    score_edges:
+    laber_checker:
+    find_match:
+    disconnected_alig:
+    add_matches_to_nodes:
+    add_matches_to_edges:
+    build_matched_graphs:
+    output_generator:
+    report_score:
+    convert_mga_to_list:
+    convert_mga_to_edgelist:
+
+
+    """
 
     def __init__(self, graph_list, graph_dict=None, node_score_list=None, edge_score_list=None):
         self.graph_list = graph_list
@@ -480,6 +530,16 @@ class VF2_GraphAligner(object):
 
 
     def vf2mult(self, save_all='end', save_path=None,forbidden=False):
+        """Alignes multiple graphs
+
+        Parameters:
+        save_all: option for saving of the results
+        save_path: path to which alignment graph is saved
+        forbidden: a dictionary of labels which are forbidden to match
+
+        Returns:
+            Returns an alignment graph made up of all input graphs
+        """
         for i in range(len(self.list_alignment_order)):
             if save_all == 'all':
                 save_all_as = save_path + str(i + 1) + ".graphml"
@@ -510,7 +570,14 @@ class VF2_GraphAligner(object):
         return (graph_ab)
 
     def vf2_pga(self,forbidden=False):
-        """Generate a paired alignment of two graphs."""
+        """Generate a paired alignment of two graphs.
+
+        Parameters
+        forbidden: dictionary of labels which are forbidden to match
+
+        Returns
+        Returns an alignment graph of two input graphs
+        """
         G1 = self.graph_list[0]
         G2 = self.graph_list[1]
         self.label_checker(G1, G2)
@@ -536,7 +603,14 @@ class VF2_GraphAligner(object):
         return (paired_result)
 
     def score_edges(self, graph):
-        """Calculate score for matched edges."""
+        """Calculate score for matched edges.
+
+        Parameters
+        graph: the graph which edges are to be scored
+
+        Returns
+        Returns the sum of all edge scores
+        """
         if self.edge_score_list == None:
             return 0
         sum_edge_score = 0
@@ -560,8 +634,14 @@ class VF2_GraphAligner(object):
                 print('Label 1 was not found in edge scoring list')
         return (sum_edge_score)
 
+
     def label_checker(self, G1, G2):
-        """Check if edges are correctly labelled, if not add a None label."""
+        """Check if edges are correctly labelled, if not add a None label.
+
+        Parameters
+        G1 and G2: input graphs which are later to be matched
+
+        """
         for edge in G1.edges():
             try:
                 G1.edges[edge]['Label']
@@ -592,9 +672,19 @@ class VF2_GraphAligner(object):
                 continue
 
     def find_match(self, G1, G2, node_score_list=False, edge_score_list=False, save_all=False, forbidden=False):
-        """Create a DirGraphAlign object and generate alignment of input graphs.
+        """Create a DirGraphAlign object and generate alignment of input graphs. The alignment is added to the
+        self.mappings list.
 
-        The alignment is added to the self.mappings list. An alignment graph is returned."""
+        Parameters
+        G1 and G2: input graphs
+        node_score_list: contains scores for node label matches
+        edge_score_list: contains scores for edge label matches
+        save_all: saving option
+        forbidden: dict with labels which are forbidden to match
+
+        Returns
+        Returns alignment graph
+        """
 
         if G1.is_directed() and G2.is_directed():
             inGraph1 = G1
@@ -606,7 +696,7 @@ class VF2_GraphAligner(object):
 
         if node_score_list:
             alignment = DirGraphAlign(inGraph1, inGraph2, node_score_list,forbid=forbidden)
-            all_alignments = alignment.alig_iter()
+            all_alignments = alignment.alig_lister()
             if len(all_alignments) > 1:
                 selected_alignment = alignment.process_results(all_alignments)
                 self.mappings.append(selected_alignment[1])
@@ -617,7 +707,7 @@ class VF2_GraphAligner(object):
 
         else:
             alignment = DirGraphAlign(inGraph1, inGraph2)
-            all_alignments = alignment.alig_iter()
+            all_alignments = alignment.alig_lister()
             if len(all_alignments) > 1:
                 selected_alignment = alignment.process_results(all_alignments)
                 self.mappings.append(selected_alignment)
@@ -641,6 +731,19 @@ class VF2_GraphAligner(object):
 
     def disconnected_alig(self, G1, G2, node_score_list=False, edge_score_list=False, save_all=False,
                           forbidden=False):
+        """Create a DirGraphAlign object and generate alignment of disconnected input graphs. The alignment is added
+        to the self.mappings list.
+
+        Parameters
+        G1 and G2: input graphs
+        node_score_list: contains scores for node label matches
+        edge_score_list: contains scores for edge label matches
+        save_all: saving option
+        forbidden: dict with labels which are forbidden to match
+
+        Returns
+        Returns alignment graph
+        """
         try:
             comp1=nx.number_connected_components(G1)
             comp2=nx.number_connected_components(G2)
@@ -677,7 +780,7 @@ class VF2_GraphAligner(object):
 
                 if node_score_list:
                     disc_alignment = DirGraphAlign(inGraph1, inGraph2, node_score_list, forbid=forbidden)
-                    all_alignments = disc_alignment.alig_iter()
+                    all_alignments = disc_alignment.alig_lister()
                     if len(all_alignments) > 1:
                         selected_alignment = disc_alignment.process_results(all_alignments)
                         mapping_list.append(selected_alignment[1])
@@ -687,7 +790,7 @@ class VF2_GraphAligner(object):
                         score_list.append(all_alignments[0][0])
                 else:
                     disc_alignment = DirGraphAlign(inGraph1, inGraph2)
-                    all_alignments = disc_alignment.alig_iter()
+                    all_alignments = disc_alignment.alig_lister()
                     if len(all_alignments) > 1:
                         selected_alignment = disc_alignment.process_results(all_alignments)
                         mapping_list.append(selected_alignment)
@@ -738,7 +841,12 @@ class VF2_GraphAligner(object):
             return (undir_gA)
 
     def add_matches_to_nodes(self, mapping, G1, G2):
-        """Add matched nodes as a dict to the nodes of the input graphs."""
+        """Add matched nodes as a dict to the nodes of the input graphs.
+
+        Parameters
+        mapping: dict with matched nodes
+        G1 and G2: matched graphs
+        """
         for node in G1:
             if node in mapping:
                 try:
@@ -799,7 +907,12 @@ class VF2_GraphAligner(object):
                 G2.nodes[node2]['Labelmatches'] = labellist
 
     def add_matches_to_edges(self, mapping, G1, G2):
-        """Add matched edges to edges of input graphs."""
+        """Add matched edges to edges of input graphs.
+
+        Parameters
+        mapping: dict with matched edges
+        G1 and G2: matched graphs
+        """
         edge_mapping = {}
 
         # for Graph1
@@ -850,7 +963,12 @@ class VF2_GraphAligner(object):
                 G2[edge2[0]][edge2[1]]['Matches'] = maplist
 
     def build_matched_graph(self, mapping, G1, G2):
-        """Build a new graph from mapping."""
+        """Build a new graph from mapping.
+
+        Parameters
+        mapping: a dict of matched nodes
+        G1 and G2: graphs that were matched
+        """
         ga = nx.DiGraph(Name='Alignment')
         for nodeg1 in G1.nodes():
             nodeattr = G1.nodes[nodeg1]
@@ -887,8 +1005,15 @@ class VF2_GraphAligner(object):
 
         return (ga)
 
-    def output_generator(self, mga, has_label, file):
-        """Prepare lists of the mapping and if desired a graphical representation of the alignment."""
+    def output_generator(self, mga, drawing_order, has_label, file):
+        """Prepares and saves a graphical representation of the alignment.
+
+        Parameters
+        mga: alignment graph
+        drawing_order: order in which input graphs were aligned with each other
+        has_label: determines if node names or node labels are displayed
+        file: where output is saved
+        """
         pos = nx.spring_layout(mga)
         nodelist_complete_match = []
         nodelist_else = []
@@ -912,13 +1037,10 @@ class VF2_GraphAligner(object):
             else:
                 edgelist_complete_match.append(edge)
 
-        Mlist = self.convert_mga_to_list(mga)
-        EList = self.convert_mga_to_edgelist(mga)
-        #pp = pprint.PrettyPrinter(indent=4)
-        #pp.pprint(Mlist)
-        #pp.pprint(EList)
-        # hier könnte man auswählen ob man den graph angezeigt haben will oder nicht.
-        # if draw==True:
+        #here, lists can be generated from the mapping
+        #Mlist = self.convert_mga_to_list(mga)
+        #EList = self.convert_mga_to_edgelist(mga)
+
         nx.draw_networkx_nodes(mga, pos, nodelist_complete_match, node_color='r', node_size=500, alpha=0.8)
         nx.draw_networkx_nodes(mga, pos, nodelist_else, node_color='g', node_size=300, alpha=0.8)
         nx.draw_networkx_edges(mga, pos, edgelist_complete_match, width=3, alpha=0.5, edge_color='r')
@@ -927,8 +1049,8 @@ class VF2_GraphAligner(object):
             nx.draw_networkx_labels(mga, pos, nodenames, font_size=12)
         else:
             nx.draw_networkx_labels(mga, pos, nodelabels, font_size=12)
+        plt.title(drawing_order)
         plt.axis('off')
-        #plt.show()
         plt.savefig(file)
         plt.clf()
 
