@@ -195,7 +195,7 @@ def main(argv):
         else:
             graph_name = i.split("/")[-1].split(".")[0]
         if graph_name not in all_graphs:
-            g = GraphIO.parse_file(i)
+            g = GraphIO.parse_file(i, graph_name)
             graphen[graph_name] = g
             all_graphs.append(graph_name)
         else:
