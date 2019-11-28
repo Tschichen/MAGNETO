@@ -671,7 +671,6 @@ def main(argv):
             matches = path + name + "_matches.txt"
             GraphIO.write_matches(mga, matches)
 
-
             # Save visualization of final graph alignment as PNG file.
             if '-d' in all_opts or '--drawm' in all_opts:
                 png_matching = path + name + "_matching.png"

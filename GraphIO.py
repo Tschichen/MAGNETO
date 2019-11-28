@@ -363,4 +363,3 @@ class GraphIO():
         with open(path, 'w') as save_matches:
             save_matches.write(matching_obj)
 
-
