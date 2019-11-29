@@ -849,57 +849,77 @@ class VF2_GraphAligner(object):
         """
         for node in G1:
             if node in mapping:
-                try:
+                if 'Matches' in G1.nodes[node]:
                     alreadyMatched = G1.nodes[node]['Matches']
-                except:
-                    matched_nodes = []
-                    matched_nodes.extend([node, mapping[node]])
-                    G1.nodes[node]['Matches'] = matched_nodes
-                else:
-                    alreadyMatched.append(mapping[node])
+                    if 'Matches' in G2.nodes[mapping[node]]:
+                        matched_matches = G2.nodes[mapping[node]]['Matches']
+                        alreadyMatched.extend(matched_matches)
+                    else:
+                        alreadyMatched.append(mapping[node])
                     G1.nodes[node]['Matches'] = alreadyMatched
+                else:
+                    matched_nodes = []
+                    if 'Matches' in G2.nodes[mapping[node]]:
+                        matched_matches = G2.nodes[mapping[node]]['Matches']
+                        matched_matches.insert(0, node)
+                        matched_nodes.extend(matched_matches)
+                    else:
+                        matched_nodes.extend([node, mapping[node]])
+                    G1.nodes[node]['Matches'] = matched_nodes
+
 
                 #for listing of node labels
-                try:
+                if 'Labelmatches' in G1.nodes[node]:
                     already_labelled = G1.nodes[node]['Labelmatches']
-                except:
-                    matched_labels = []
-                    matched_node_label = G2.nodes[mapping[node]]['Label']
-                    matched_labels.extend([G1.nodes[node]['Label'], matched_node_label])
-                    G1.nodes[node]['Labelmatches'] = matched_labels
-                else:
-                    already_labelled.append(G2.nodes[mapping[node]]['Label'])
+                    if 'Labelmatches' in G2.nodes[mapping[node]]:
+                        matched_labmatches = G2.nodes[mapping[node]]['Labelmatches']
+                        already_labelled.extend(matched_labmatches)
+                    else:
+                        already_labelled.append(G2.nodes[mapping[node]]['Label'])
                     G1.nodes[node]['Labelmatches'] = already_labelled
+                else:
+                    matched_labels = []
+                    if 'Labelmatches' in G2.nodes[mapping[node]]:
+                        matched_labmatches = G2.nodes[mapping[node]]['Labelmatches']
+                        matched_labmatches.insert(0, G1.node.node['Label'])
+                        matched_labels.extend(matched_labmatches)
+                    else:
+                        matched_node_label = G2.nodes[mapping[node]]['Label']
+                        matched_labels.extend([G1.nodes[node]['Label'], matched_node_label])
+                    G1.nodes[node]['Labelmatches'] = matched_labels
 
             else:
-                try:
+                g2matchtest = list(G2.nodes.data('Matches', default = [1]))
+                gapnum = ['-'] * len(g2matchtest[0][1])
+
+                if 'Matches' in G1.nodes[node]:
                     alreadyMatched = G1.nodes[node]['Matches']
-                except:
+                    alreadyMatched.extend(gapnum)
+                    G1.nodes[node]['Matches'] = alreadyMatched
+                else:
                     matched_nodes = []
                     matched_nodes.append(node)
-                    matched_nodes.append('-')
+                    matched_nodes.extend(gapnum)
                     G1.nodes[node]['Matches'] = matched_nodes
-                else:
-                    alreadyMatched.append('-')
-                    G1.nodes[node]['Matches'] = alreadyMatched
+
 
                 #for listing of labels
-                try:
+                if 'Labelmatches' in G1.nodes[node]:
                     already_labelled = G1.nodes[node]['Labelmatches']
-                except:
+                    already_labelled.extend(gapnum)
+                    G1.nodes[node]['Labelmatches'] = already_labelled
+                else:
                     matched_labels = []
                     matched_labels.append(G1.nodes[node]['Label'])
-                    matched_labels.append('-')
+                    matched_labels.extend(gapnum)
                     G1.nodes[node]['Labelmatches'] = matched_labels
-                else:
-                    already_labelled.append('-')
-                    G1.nodes[node]['Labelmatches'] = already_labelled
+
 
         maplen = len(G1.nodes[node]['Matches'])
 
         for node2 in G2:
             if node2 not in mapping.values():
-                maplist = ["-"] * (maplen - 1)
+                maplist = ["-"] * (maplen-1)
                 maplist.append(node2)
                 G2.nodes[node2]['Matches'] = maplist
                 labellist = ['-']*(maplen-1)
@@ -910,7 +930,7 @@ class VF2_GraphAligner(object):
         """Add matched edges to edges of input graphs.
 
         Parameters
-        mapping: dict with matched edges
+        mapping: dict with matched nodes
         G1 and G2: matched graphs
         """
         edge_mapping = {}
@@ -927,40 +947,56 @@ class VF2_GraphAligner(object):
                 matched_tail = mapping[tail_node]
                 matched_head = mapping[head_node]
                 matched_edge_label = G2[matched_tail][matched_head]['Label']
+                if 'Matches' in G2[matched_tail][matched_head]:
+                    matched_edge_matchings = G2[matched_tail][matched_head]['Matches']
+                else:
+                    matched_edge_matchings = None
                 matched_edge_construct = (matched_tail, matched_head, matched_edge_label)
                 edge_mapping[edge_ident] = matched_edge_construct
-                try:
+                if 'Matches' in G1[tail_node][head_node]:
                     already_matched = G1[tail_node][head_node]['Matches']
-                except:
-                    matched = []
-                    matched.extend([edge_construct, matched_edge_construct])
-                    G1[tail_node][head_node]['Matches'] = matched
-
-                else:
-                    already_matched.append(matched_edge_construct)
+                    if matched_edge_matchings != None:
+                        already_matched.extend(matched_edge_matchings)
+                    else:
+                        already_matched.append(matched_edge_construct)
                     G1[tail_node][head_node]['Matches'] = already_matched
+                else:
+                    matched = []
+                    if matched_edge_matchings != None:
+                        matched.extend([edge_construct, matched_edge_matchings])
+                    else:
+                        matched.extend([edge_construct, matched_edge_construct])
+                    G1[tail_node][head_node]['Matches'] = matched
 
             # case: tail or head is not in mapping
             else:
-                try:
+                g2matchteste = list(G2.edges.data('Matches', default=[1]))
+                gapnum = ['-'] * len(g2matchteste[0][2])
+
+                if 'Matches' in G1[tail_node][head_node]:
                     already_matched = G1[tail_node][head_node]['Matches']
-                except:
-                    matched = []
-                    matched.append(edge_construct)
-                    matched.append('-')
-                    G1[tail_node][head_node]['Matches'] = matched
-                else:
-                    already_matched.append('-')
+                    already_matched.extend(gapnum)
                     G1[tail_node][head_node]['Matches'] = already_matched
+                else:
+                    matched = [edge_construct]
+                    matched.extend(gapnum)
+                    G1[tail_node][head_node]['Matches'] = matched
 
             maplen = len(G1[tail_node][head_node]['Matches'])
 
             # for Graph2:
         for edge2 in G2.edges(data=True):
-            if edge2 not in edge_mapping.values():
-                maplist = ["-"] * (maplen - 1)
-                maplist.append([edge2[0], edge2[1], edge2[2]['Label']])
+            edge2tuple = (edge2[0], edge2[1], edge2[2]['Label'])
+            if edge2tuple not in edge_mapping.values():
+                if 'Matches' in G2[edge2[0]][edge2[1]]:
+                    g2matched = G2[edge2[0]][edge2[1]]['Matches']
+                    maplist = ["-"] * (maplen - len(g2matched))
+                    maplist.extend(g2matched)
+                else:
+                    maplist = ["-"] * (maplen - 1)
+                    maplist.append(edge2tuple)
                 G2[edge2[0]][edge2[1]]['Matches'] = maplist
+
 
     def build_matched_graph(self, mapping, G1, G2):
         """Build a new graph from mapping.
