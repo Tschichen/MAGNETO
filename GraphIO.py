@@ -114,7 +114,7 @@ class GraphIO():
                 d[k] = json.loads(d[k])
         return G
 
-    def parse_file(file_loc):
+    def parse_file(file_loc, name):
         """This function takes a path to a graph in graph format and returns a networkX DiGraph object.
 
             All available informations such as knots and edge labels as well as whether a directed or undirected graph is processed.
@@ -124,7 +124,7 @@ class GraphIO():
         g = nx.DiGraph()
         i = 0
         anz_attributes = 5
-        name = file_loc.split('\\')[-1].split('.')[0]
+
         try:
             f = open(file_loc)
             fl = f.readlines()
