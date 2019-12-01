@@ -811,7 +811,7 @@ class VF2_GraphAligner(object):
                         workgraph2.remove_node(delnode)
 
             # mapping zusammenbauen
-            joint_map = mapping_list[0]
+            joint_map = {}
             for j in range(len(mapping_list)):
                 bla = orderlist[j][0]
                 if orderlist[j][0] == "G2":
@@ -838,6 +838,7 @@ class VF2_GraphAligner(object):
                 GraphIO.write_graphML_file(graphAlignment, save_all)
 
             undir_gA = graphAlignment.to_undirected()
+            print(self.mappings[-1])
             return (undir_gA)
 
     def add_matches_to_nodes(self, mapping, G1, G2):
