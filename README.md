@@ -16,16 +16,16 @@ A python3-based tool that takes multiple graph objects and aligns them in a prog
 
 ## Input examples
 * minimum input  
-    ```python3 main_func.py -i users/path/dir_with_graphs/ -o my_name```
+    ```python3 migraine.py-i users/path/dir_with_graphs/ -o my_name```
 	
 * reads newick tree from file  
- ```python3 main_func.py -i users/path/dir_with_graphs -o my_name -n users/path/some_dir/tree.nwtree ```
+ ```python3 migraine.py -i users/path/dir_with_graphs -o my_name -n users/path/some_dir/tree.nwtree ```
 	
 * uses BK and predefines a clique, saves all alignment steps  
-	```python3 main_func.py -i users/path/dir_with_graphs/ -o my_name -b -c users/path/dir/clique.json -m all```
+	```python3 migraine.py -i users/path/dir_with_graphs/ -o my_name -b -c users/path/dir/clique.json -m all```
 	
 * reads a list with scores and scores labels according to list, saves guide tree as newick  
-	```python3 main_func.py -i users/path/dir_with_graphs/ -o my_name -s users/path/some_dir/score_list.txt -q```
+	```python3 migraine.py -i users/path/dir_with_graphs/ -o my_name -s users/path/some_dir/score_list.txt -q```
 	
 
 ## Options
