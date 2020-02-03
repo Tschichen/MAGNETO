@@ -14,6 +14,14 @@ A python3-based tool that takes multiple graph objects and aligns them in a prog
 
 ```git clone https://github.com/Tschichen/MIGRAINE.git```
 
+Dependencies can be installed using [pipenv](https://github.com/pypa/pipenv).
+Simply run:
+```
+pipenv install
+```
+
+and precede all commands with `pipenv run` to execute them in a virtualized environment.
+
 ## Input examples
 * minimum input  
     ```python3 migraine.py-i users/path/dir_with_graphs/ -o my_name```
