@@ -1,0 +1,42 @@
+#nodes;18
+#edges;17
+Nodes labelled;True
+Edges labelled;True
+Directed Graph;False
+
+1;8
+2;8
+3;7
+4;7
+5;7
+6;6
+7;6
+8;6
+9;6
+10;1
+11;1
+12;1
+13;1
+14;1
+15;1
+16;1
+17;1
+18;1
+
+1;9;single
+1;18;single
+2;9;double
+3;6;single
+3;7;single
+3;8;single
+4;8;single
+4;15;single
+4;16;single
+5;8;double
+5;17;single
+6;9;single
+6;10;single
+6;11;single
+7;12;single
+7;13;single
+7;14;single
