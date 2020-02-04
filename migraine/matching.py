@@ -1,9 +1,9 @@
 import networkx as nx
 import math
 import random
-import GraphIO as io
+import migraine.GraphIO as io
 import matplotlib.pyplot as plt
-import keep
+import migraine.keep as keep
 
 
 class Matching():

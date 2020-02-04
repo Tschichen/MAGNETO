@@ -3,7 +3,7 @@ import math
 import matplotlib.pyplot as plt
 import inspect
 import random
-from GraphIO import GraphIO
+from .GraphIO import GraphIO
 
 
 class DirGraphAlign(object):

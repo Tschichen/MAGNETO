@@ -7,13 +7,13 @@ import networkx as nx
 import time
 import os
 # moduls by our group
-from GraphIO import GraphIO
-import guide_tree as gt
-import matching as mt
-import VF2_pair_multi_flash as vf
-import keep
-import Clique
-import graph_gen as gg
+from migraine.GraphIO import GraphIO
+import migraine.guide_tree as gt
+import migraine.matching as mt
+import migraine.VF2_pair_multi_flash as vf
+import migraine.keep as keep
+import migraine.Clique as Clique
+import migraine.graph_gen as gg
 
 
 def main(argv):
@@ -195,7 +195,7 @@ def main(argv):
         else:
             graph_name = i.split("/")[-1].split(".")[0]
         if graph_name not in all_graphs:
-            g = GraphIO.parse_file(i)
+            g = GraphIO.parse_file(i, graph_name)
             graphen[graph_name] = g
             all_graphs.append(graph_name)
         else:
@@ -637,7 +637,7 @@ def main(argv):
             print("Could not write to " + ml_path + " !")
 
         matches = path + name + "_matches.txt"
-        GraphIO.write_matches(m, matches)
+        GraphIO.write_matches(m.network, matches)
 
 
     # Multiple Graph Alignment via VF2.
@@ -669,18 +669,15 @@ def main(argv):
             GraphIO.write_graphML_file(mga, ml_path)
             print("Saved Final Matching as Graphml")
             matches = path + name + "_matches.txt"
-            MList = multiple_aligner.convert_mga_to_list(mga)
-            EList = multiple_aligner.convert_mga_to_edgelist(mga)
-            GraphIO.write_vf2_results(mga, MList, EList, matches)
-
+            GraphIO.write_matches(mga, matches)
 
             # Save visualization of final graph alignment as PNG file.
             if '-d' in all_opts or '--drawm' in all_opts:
                 png_matching = path + name + "_matching.png"
                 if nodes_labelled:
-                    multiple_aligner.output_generator(mga, "label", png_matching)
+                    multiple_aligner.output_generator(mga, drawing_order, "label", png_matching)
                 else:
-                    multiple_aligner.output_generator(mga, "nolabel", png_matching)
+                    multiple_aligner.output_generator(mga, drawing_order, "nolabel", png_matching)
                 print("Saved Matching as PNG")
 
             time_vf2_mult = time.time() - time_vf22

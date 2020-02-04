@@ -1,7 +1,7 @@
 import math
 import networkx as nx
-import matching as m
-import GraphIO as io
+import migraine.matching as m
+import migraine.GraphIO as io
 
 """
 A script that contains functions to implement scoring of alignments depending on node and / or edge labels and integration of forbidden matches between certain node and / or edge labels.
@@ -22,12 +22,12 @@ A script that contains functions to implement scoring of alignments depending on
 
 def parse_keep_input(path):
 	"""Takes a path to an user input file with information for scoring node and / or edge labels and returns list of scores for either nodes or edges or both; additional forbidden label combinations can be realized through this user input.
-	
+
 		Parameters
 		----------
 		path : path to file representing user scoring function for node and / or edge labels as well as forbidden matches if desired
 		input must be in the layout described in template_keep_function.txt
-		
+
 		Output
 		------
 		returns array with scores for node- and edge labels [[node_scores], [edge_scores]], if only scores for edge or labels are in input file, array looks like: [[score_list], []]
@@ -86,10 +86,10 @@ def parse_keep_input(path):
 			else:
 				recent_node_score_array.append(int(score))
 			score_list_per_label.append(recent_node_score_array)
-			
+
 			k += 1
 			j += 1
-		
+
 		if z > 0:
 			for g in range(z):
 				recent_label = node_label_array[k]
@@ -101,7 +101,7 @@ def parse_keep_input(path):
 					recent_node_score_array.append(int(score))
 				k += 1
 				score_list_per_label.append(recent_node_score_array)
-		
+
 		user_list_node_scores[len(node_score_array) - z - 1].append(score_list_per_label)
 
 	# make score array for edges
@@ -150,7 +150,7 @@ def modular_product_valid_matchings(modular_graphproduct, user_list_node_and_edg
 		modular_graphproduct : modular graph product of two graphs in networkX graph
 		user_list_node_and_edge_scores : list generated in function parse_keep_input
 		nodes_edges_both : type "nodes" if only forbidden nodes label matches should be deleted, "edges" for only edge deleting, and "both" for deleting forbidden nodes and edges
-		
+
 		Output
 		------
 		modular graph product without the forbidden label matches of nodes and / or edges as networkX graph
@@ -195,7 +195,7 @@ def modular_product_valid_matchings(modular_graphproduct, user_list_node_and_edg
 
 def find_forbidden_matches(user_list_scores):
 	"""Help function for finding forbidden label matches in the list generated from parse_keep_input.
-	
+
 		Output
 		------
 		returns dict: key = label, value: forbidden dicts for key label
@@ -214,12 +214,12 @@ def find_forbidden_matches(user_list_scores):
 
 def match_is_permitted(label_a, label_b, forbidden_label_dict):
 	"""Help function for finding forbidden label matches in the list generated from parse_keep_input.
-	
+
 		Parameters
 		----------
 		label_a, label_b : node or edge labels
 		forbidden_label_dict : dict generated in find_forbidden_matches
-	
+
 		Output
 		------
 		returns true, is match is allowed, false otherwise
@@ -274,7 +274,7 @@ def score_from_BK(list_of_cliques, user_list_or_arrays_scores, nodes_edges_both)
 		list_of_cliques : list of all cliques found in the modular graph product of two graphs via bk algorithm
 		user_list_or_arrays_scores : list generated in function parse_keep_input
 		nodes_edges_both : type "nodes" if only nodes should be scored, "edges" for only edge scoring, and "both" for scoring nodes and edges
-	
+
 		Output
 		------
 		tuple of max scoring clique and score

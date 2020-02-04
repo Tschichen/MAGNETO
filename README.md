@@ -14,27 +14,24 @@ A python3-based tool that takes multiple graph objects and aligns them in a prog
 
 ```git clone https://github.com/Tschichen/MIGRAINE.git```
 
-Dependencies can be installed using [pipenv](https://github.com/pypa/pipenv).
-Simply run:
+Furthermore, you can install the library as a dependency by executing:
 ```
-pipenv install
+pip3 install -e . --user
 ```
-
-and precede all commands with `pipenv run` to execute them in a virtualized environment.
 
 ## Input examples
-* minimum input  
-    ```python3 migraine.py-i users/path/dir_with_graphs/ -o my_name```
-	
-* reads newick tree from file  
- ```python3 migraine.py -i users/path/dir_with_graphs -o my_name -n users/path/some_dir/tree.nwtree ```
-	
-* uses BK and predefines a clique, saves all alignment steps  
-	```python3 migraine.py -i users/path/dir_with_graphs/ -o my_name -b -c users/path/dir/clique.json -m all```
-	
-* reads a list with scores and scores labels according to list, saves guide tree as newick  
-	```python3 migraine.py -i users/path/dir_with_graphs/ -o my_name -s users/path/some_dir/score_list.txt -q```
-	
+* minimum input
+    ```python3 migraine -i users/path/dir_with_graphs/ -o my_name```
+
+* reads newick tree from file
+ ```python3 migraine -i users/path/dir_with_graphs -o my_name -n users/path/some_dir/tree.nwtree ```
+
+* uses BK and predefines a clique, saves all alignment steps
+	```python3 migraine -i users/path/dir_with_graphs/ -o my_name -b -c users/path/dir/clique.json -m all```
+
+* reads a list with scores and scores labels according to list, saves guide tree as newick
+	```python3 migraine -i users/path/dir_with_graphs/ -o my_name -s users/path/some_dir/score_list.txt -q```
+
 
 ## Options
 
