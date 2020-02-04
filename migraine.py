@@ -680,12 +680,12 @@ def main(argv):
                     multiple_aligner.output_generator(mga, drawing_order, "nolabel", png_matching)
                 print("Saved Matching as PNG")
 
-            time_vf2_mult = time.time() - time_vf22
-
         except KeyError:
             if '-n' in all_opts:
                 print("Error! Can't create Multiple Alignment. Check if tree corresponds to input graphs.")
                 exit()
+                
+        time_vf2_mult = time.time() - time_vf22
 
     # Benchmarking.
     if vf2:
