@@ -191,9 +191,9 @@ def main(argv):
     # Parse all .graph files.
     for i in graphs:
         if windows:
-            graph_name = i.split("\\")[-1].split(".")[0]
+            graph_name = i.split("\\")[-1].split(".")[-1]
         else:
-            graph_name = i.split("/")[-1].split(".")[0]
+            graph_name = i.split("/")[-1].split(".")[-1]
         if graph_name not in all_graphs:
             g = GraphIO.parse_file(i, graph_name)
             graphen[graph_name] = g
@@ -204,9 +204,9 @@ def main(argv):
     # Parse all .json files.
     for i in js_graphs:
         if windows:
-            graph_name = i.split("\\")[-1].split(".")[0]
+            graph_name = i.split("\\")[-1].split(".")[-1]
         else:
-            graph_name = i.split("/")[-1].split(".")[0]
+            graph_name = i.split("/")[-1].split(".")[-1]
         if graph_name not in all_graphs:
             g = GraphIO.parse_json_pubchem(i)
             graphen[graph_name] = g
@@ -217,9 +217,9 @@ def main(argv):
     # Parse all .graphml files.
     for i in ml_graphs:
         if windows:
-            graph_name = i.split("\\")[-1].split(".")[0]
+            graph_name = i.split("\\")[-1].split(".")[-1]
         else:
-            graph_name = i.split("/")[-1].split(".")[0]
+            graph_name = i.split("/")[-1].split(".")[-1]
         if graph_name not in all_graphs:
             g = GraphIO.parse_graphML_file(i)
             graphen[graph_name] = g
