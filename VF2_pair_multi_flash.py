@@ -701,9 +701,12 @@ class VF2_GraphAligner(object):
                 selected_alignment = alignment.process_results(all_alignments)
                 self.mappings.append(selected_alignment[1])
                 self.scores.append(selected_alignment[0])
-            else:
+            elif len(all_alignments) == 1:
                 self.mappings.append(all_alignments[0][1])
                 self.scores.append(all_alignments[0][0])
+            else:
+                print("No Common Induced Subgraph Found")
+                self.scores.append(1.0)
 
         else:
             alignment = DirGraphAlign(inGraph1, inGraph2)
@@ -711,8 +714,10 @@ class VF2_GraphAligner(object):
             if len(all_alignments) > 1:
                 selected_alignment = alignment.process_results(all_alignments)
                 self.mappings.append(selected_alignment)
-            else:
+            elif len(all_alignments) == 1:
                 self.mappings.append(all_alignments[0])
+            else:
+                print("No Common Induced Subgraph Found")
 
         pair_or_mult = inspect.currentframe().f_back.f_code.co_name
         if pair_or_mult == "vf2mult":
