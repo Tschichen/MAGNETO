@@ -228,14 +228,13 @@ class Guide_tree_Generator:
 		
 		return guide_tree
 
-
 	def score_to_matrix(list_with_scores):
 		"""Help function that returns a distance matrix for guide tree generation.
 		"""
 		# lexikographic sort of list and graphs for further proceeding
-		for i in range (len(list_with_scores)):
+		for i in range(len(list_with_scores)):
 			graphs = [list_with_scores[i][0], list_with_scores[i][1]]
-			graphs.sort(key=str.lower)
+			graphs.sort()
 			graphs.reverse()
 			list_with_scores[i][0] = graphs[0]
 			list_with_scores[i][1] = graphs[1]
@@ -291,5 +290,5 @@ class Guide_tree_Generator:
 				names.append(graph_1)
 			if graph_2 not in names:
 				names.append(graph_2)
-		names.sort()
-		return names
+		names_sorted = sorted(names, key=str.casefold)
+		return names_sorted

@@ -28,7 +28,7 @@ def main(argv):
 
     # Catch some Exceptions for bad user input.
     try:
-        opts, args = getopt.getopt(argv, "hi:o:c:n:rts:bqg:m:dvf",
+        opts, args = getopt.getopt(argv, "hi:o:c:n:rts:bqg:m:dvfH",
                                    ["help", "bronkerbosch", "score=", "labelling=", "newick=", "randomt", "showt",
                                     "savetn", "drawm", "graphgen", "forbidden"])
 
@@ -55,6 +55,7 @@ def main(argv):
             print("-o <name>\t\t\tdefine name for the current aligment run. MANDATORY OPTION!")
             print(
                 "-c <input file>\t\t\tinput a graph file as an anchor for alignment. This graph needs to be common to all graphs that are to be aligned and acts as a basis to the alignment")
+            print("-H\t\t\t\tremoves hydroxygen molecules from input graphs. Or in general nodes labelled '1'")
             print()
             print("ALIGNMENT OPTIONS")
             print(
@@ -273,6 +274,19 @@ def main(argv):
                 print("Warning! Some of your graphs have labeled edges, some don't.")
                 break
         edges_labelled = False
+        
+    if "-H" in all_opts:
+        a = nx.get_node_attributes(graphen[all_graphs[0]],"Label")
+        if list(a.items())[0][1] != None:
+            for graph in all_graphs:
+                h_nodes = []
+                for node in graphen[graph].nodes(data=True):
+                    if node[1]['Label'] == '1':
+                        h_nodes.append(node[0])
+                graphen[graph].remove_nodes_from(h_nodes)
+            print('Filtered Hydroxygen')
+        else:
+            print("Graphs are not labelled, can't filter for Hydroxygen")        
 
     '''pairwise Alignment and Scoring'''
 
