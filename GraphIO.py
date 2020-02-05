@@ -329,37 +329,69 @@ class GraphIO():
                 d[k] = json.dumps(d[k])
         nx.write_graphml(outgraph, path)
 
-
     def write_matches(matching, path):
         """Function that takes a path to an output file and generates a MATCHING file with the nodes and edges of the
         final matching object.
         """
 
-        matching_obj = "#Node matching\n"
+        try:
+            matching_obj = "#Node matching\n"
+            for node in matching.nodes(data=True):
+                matching_obj += 'Node;' + node[0] + '\nLabel;' + str(node[1]['Label']) + '\nGraph;' + str(node[1][
+                                                                                                              'Graph']) + '\nMatches;'
+                i = 0
+                for match in node[1]['Matches']:
+                    print(node)
+                    if match != '-':
+                        triple = "(" + str(match) + ",Label:" + str(node[1]['Labelmatches'][i]) + ")"
+                    else:
+                        triple = 'None'
+                    matching_obj += triple + ";"
+                    i+=1
+                matching_obj += "\n\n"
 
-        for node in matching.nodes(data=True):
-            matching_obj += 'Node;' + node[0] + '\nLabel;' + str(node[1]['Label']) + '\nGraph;' + str(node[1][
-                                                                                                          'Graph']) + '\nMatches;'
-            for match in node[1]['Matches']:
-                if match != '-':
-                    triple = "(" + str(match) + ")"
-                else:
-                    triple = 'None'
-                matching_obj += triple + ";"
-            matching_obj += "\n\n"
+            matching_obj += "#Edges\n"
+            for edge in matching.edges(data=True):
+                print(edge)
+                matching_obj += 'Edge;' + edge[0] + ";" + edge[1] + '\nLabel;' + str(edge[2]['Label']) + '\nGraph;' + \
+                                str(edge[2]['Graph']) + '\nMatches;'
+                for match in edge[2]['Matches']:
+                    if match == '-'or match == None:
+                        quadruple = 'None'
+                    else:
+                        quadruple = "(" + str(match[0]) + "," + str(match[1]) + "," + str(match[2]) + ")"
+                    matching_obj += quadruple + ";"
+                matching_obj += "\n\n"
 
-        matching_obj += "#Edges\n"
-        for edge in matching.edges(data=True):
-            matching_obj += 'Edge;' + edge[0] + ";" + edge[1] + '\nLabel;' + str(edge[2]['Label']) + '\nGraph;' + \
-                            str(edge[2]['Graph']) + '\nMatches;'
-            for match in edge[2]['Matches']:
-                if match == '-'or match == None:
-                    quadruple = 'None'
-                else:
-                    quadruple = "(" + str(match[0]) + "," + str(match[1]) + "," + str(match[2]) + ")"
-                matching_obj += quadruple + ";"
-            matching_obj += "\n\n"
+        except:
+            matching_obj = "#Node matching\n"
+            for node in matching.nodes(data=True):
+                matching_obj += 'Node;' + node[0] + '\nLabel;' + str(node[1]['Label']) + '\nGraph;' + str(node[1][
+                                                                                                              'Graph']) + '\nMatches;'
+                for match in node[1]['Matches']:
+                    print(node)
+                    if match != '-':
+                        triple = "(" + str(match[0]) + ",Label:" + str(match[1]) + ")"
+                    else:
+                        triple = 'None'
+                    matching_obj += triple + ";"
+                    i += 1
+                matching_obj += "\n\n"
+
+            matching_obj += "#Edges\n"
+            for edge in matching.edges(data=True):
+                print(edge)
+                matching_obj += 'Edge;' + edge[0] + ";" + edge[1] + '\nLabel;' + str(edge[2]['Label']) + '\nGraph;' + \
+                                str(edge[2]['Graph']) + '\nMatches;'
+                for match in edge[2]['Matches']:
+                    if match == '-' or match == None:
+                        quadruple = 'None'
+                    else:
+                        quadruple = "(" + str(match[0]) + "," + str(match[1]) + "," + str(match[2]) + ")"
+                    matching_obj += quadruple + ";"
+                matching_obj += "\n\n"
 
         with open(path, 'w') as save_matches:
             save_matches.write(matching_obj)
+
 
