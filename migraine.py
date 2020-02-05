@@ -28,7 +28,7 @@ def main(argv):
 
     # Catch some Exceptions for bad user input.
     try:
-        opts, args = getopt.getopt(argv, "hi:o:c:n:rts:bqg:m:dvf",
+        opts, args = getopt.getopt(argv, "hi:o:c:n:rts:bqg:m:dvfH",
                                    ["help", "bronkerbosch", "score=", "labelling=", "newick=", "randomt", "showt",
                                     "savetn", "drawm", "graphgen", "forbidden"])
 
