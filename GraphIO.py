@@ -341,7 +341,6 @@ class GraphIO():
                                                                                                               'Graph']) + '\nMatches;'
                 i = 0
                 for match in node[1]['Matches']:
-                    print(node)
                     if match != '-':
                         triple = "(" + str(match) + ",Label:" + str(node[1]['Labelmatches'][i]) + ")"
                     else:
@@ -352,7 +351,6 @@ class GraphIO():
 
             matching_obj += "#Edges\n"
             for edge in matching.edges(data=True):
-                print(edge)
                 matching_obj += 'Edge;' + edge[0] + ";" + edge[1] + '\nLabel;' + str(edge[2]['Label']) + '\nGraph;' + \
                                 str(edge[2]['Graph']) + '\nMatches;'
                 for match in edge[2]['Matches']:
@@ -369,7 +367,6 @@ class GraphIO():
                 matching_obj += 'Node;' + node[0] + '\nLabel;' + str(node[1]['Label']) + '\nGraph;' + str(node[1][
                                                                                                               'Graph']) + '\nMatches;'
                 for match in node[1]['Matches']:
-                    print(node)
                     if match != '-':
                         triple = "(" + str(match[0]) + ",Label:" + str(match[1]) + ")"
                     else:
@@ -380,7 +377,6 @@ class GraphIO():
 
             matching_obj += "#Edges\n"
             for edge in matching.edges(data=True):
-                print(edge)
                 matching_obj += 'Edge;' + edge[0] + ";" + edge[1] + '\nLabel;' + str(edge[2]['Label']) + '\nGraph;' + \
                                 str(edge[2]['Graph']) + '\nMatches;'
                 for match in edge[2]['Matches']:
