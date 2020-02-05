@@ -134,7 +134,7 @@ def main(argv):
                 exit()
             pre_clique = True
             if arg.endswith('graph'):
-                clique = GraphIO.parse_file(arg)
+                clique = GraphIO.parse_file(arg,'clique_temp')
             elif arg.endswith('json'):
                 clique = GraphIO.parse_json_pubchem(arg)
             elif arg.endswith('graphml'):
