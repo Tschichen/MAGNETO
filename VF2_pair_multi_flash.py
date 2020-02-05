@@ -3,6 +3,7 @@ import math
 import matplotlib.pyplot as plt
 import inspect
 import random
+import sys
 from GraphIO import GraphIO
 
 
@@ -43,7 +44,7 @@ class DirGraphAlign(object):
 
         mapping: a copy of the core_1 dict, returned at the end to the user.
         """
-
+        sys.setrecursionlimit(10000)
         self.core_1 = dict()
         self.core_2 = dict()
 
@@ -109,14 +110,20 @@ class DirGraphAlign(object):
         # If T1_out and T2_out contain nodes:
         # P(s) = T1_out x min (T2_out)
         if T1_out and T2_out:
-            node_2 = min(T2_out, key=min_key)
+            for node_2 in T2_out:
+                #print(node_2)
+            #node_2 = min(T2_out, key=min_key)
             # node_2 = alternative?
-            for node_1 in T1_out:
-                if self.label_match(node_1, node_2):
-                    pair = tuple((node_1, node_2))
-                    yield pair
-            else:
-                yield None
+                for node_1 in T1_out:
+                    if self.label_match(node_1, node_2):
+                        pair = tuple((node_1, node_2))
+                        yield pair
+                #else:
+                    #yield None
+            #else:
+                #print("t2 empty")
+                #yield None
+
 
         # In case T1_out and T2_out are both empty:
         elif not (T1_out or T2_out):
@@ -126,30 +133,38 @@ class DirGraphAlign(object):
             # If T1_in and T2_in contain nodes:
             # P(s) = T1_out x min (T2_out)
             if T1_in and T2_in:
-                node_2 = min(T2_in, key=min_key)
-                # node_2 = alternative?
-                for node_1 in T1_in:
-                    if self.label_match(node_1, node_2):
-                        pair = tuple((node_1, node_2))
-                        yield pair
+                #print("t1 and t2")
+                #node_2 = min(T2_in, key=min_key)
+                for node_2 in T2_in:
+                    for node_1 in T1_in:
+                        if self.label_match(node_1, node_2):
+                            pair = tuple((node_1, node_2))
+                            yield pair
                 else:
                     yield None
+
 
             # In case all terminal sets are empty:
             # P(s) = (N_1 - M_1) x (min (N_2 - M_2))
             elif (len(self.core_2) != len(G2_nodes)):
-                node_2 = min(G2_nodes - set(self.core_2), key=min_key)
+                #print("all empty")
+                #node_2 = min(G2_nodes - set(self.core_2), key=min_key)
                 #Ps = list(G2_nodes - set(self.core_2))
+                for node_2 in self.G2_nodes:
+                    if node_2 not in self.core_2:
                 #node_2 = alterantive function?
-                for node_1 in G1_nodes:
-                    if node_1 not in self.core_1:
-                        if self.label_match(node_1, node_2):
-                            pair = tuple((node_1, node_2))
-                            yield pair
+                        for node_1 in G1_nodes:
+                            if node_1 not in self.core_1:
+                                if self.label_match(node_1, node_2):
+                                    pair = tuple((node_1, node_2))
+                                    yield pair
+                else:
+                    yield None
             else:
                 yield None
 
         else:
+            #print("no candidates")
             yield None
 
     def matcher(self):
@@ -164,10 +179,12 @@ class DirGraphAlign(object):
             if x == None:
                 G1_node = None
                 G2_node = None
+                #print(len(self.core_1))
                 if len(self.core_1) < self.current_max_len:
+                    #if len(self.core_1) != 0:
                     self.state.restore()
                     yield 0
-                else:
+                elif len(self.core_1) != 0:
                     self.mapping = self.core_1.copy()
                     self.current_max_len = len(self.mapping)
                     if self.evalNodeAttr:
@@ -177,6 +194,9 @@ class DirGraphAlign(object):
                     else:
                         self.state.restore()
                         yield self.mapping
+                else:
+                    self.state.restore()
+                    yield 0
             else:
                 G1_node = x[0]
                 G2_node = x[1]
@@ -469,10 +489,13 @@ class MappingState(object):
 
         # First we remove the node that was added from the core vectors.
         if self.G1_node is not None and self.G2_node is not None:
-            self.GM.core_1.popitem()
-            self.GM.core_2.popitem()
+            if len(self.GM.core_1) != 0:
+                self.GM.core_1.popitem()
+            if len(self.GM.core_2) != 0:
+                self.GM.core_2.popitem()
 
-        self.GM.runningStatelist.pop()
+        if len(self.GM.runningStatelist) != 0:
+            self.GM.runningStatelist.pop()
 
         # Now we restore the other vectors.
         # Thus, we delete all entries added at this depth level of the search
@@ -1080,10 +1103,11 @@ class VF2_GraphAligner(object):
                 edgelist_complete_match.append(edge)
 
         #here, lists can be generated from the mapping
-        #Mlist = self.convert_mga_to_list(mga)
+        Mlist = self.convert_mga_to_list(mga)
+        #print(Mlist)
         #EList = self.convert_mga_to_edgelist(mga)
 
-        nx.draw_networkx_nodes(mga, pos, nodelist_complete_match, node_color='r', node_size=500, alpha=0.8)
+        nx.draw_networkx_nodes(mga, pos, nodelist_complete_match, node_color='r', node_size=300, alpha=0.8)
         nx.draw_networkx_nodes(mga, pos, nodelist_else, node_color='g', node_size=300, alpha=0.8)
         nx.draw_networkx_edges(mga, pos, edgelist_complete_match, width=3, alpha=0.5, edge_color='r')
         nx.draw_networkx_edges(mga, pos, edgelist_else, width=3, alpha=0.5, edge_color='b')
@@ -1093,7 +1117,7 @@ class VF2_GraphAligner(object):
             nx.draw_networkx_labels(mga, pos, nodelabels, font_size=12)
         plt.title(drawing_order)
         plt.axis('off')
-        plt.savefig(file)
+        plt.savefig(file, dpi=300)
         plt.clf()
 
     def report_score(self):
