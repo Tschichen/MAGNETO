@@ -367,7 +367,7 @@ class GraphIO():
                 matching_obj += 'Node;' + node[0] + '\nLabel;' + str(node[1]['Label']) + '\nGraph;' + str(node[1][
                                                                                                               'Graph']) + '\nMatches;'
                 for match in node[1]['Matches']:
-                    if match != '-':
+                    if match != None:
                         triple = "(" + str(match[0]) + ",Label:" + str(match[1]) + ")"
                     else:
                         triple = 'None'
