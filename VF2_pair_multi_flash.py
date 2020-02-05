@@ -104,8 +104,8 @@ class DirGraphAlign(object):
         # max_grad = self.G2_node_order.__getitem__
         #alternative function?
 
-        T1_out = [node for node in self.out_1 if node not in self.core_1]
-        T2_out = [node for node in self.out_2 if node not in self.core_2]
+        T1_out = sorted([node for node in self.out_1 if node not in self.core_1])
+        T2_out = sorted([node for node in self.out_2 if node not in self.core_2])
 
         # If T1_out and T2_out contain nodes:
         # P(s) = T1_out x min (T2_out)
@@ -120,25 +120,25 @@ class DirGraphAlign(object):
                         yield pair
                 #else:
                     #yield None
-            #else:
-                #print("t2 empty")
-                #yield None
+            else:
+                yield None
 
 
         # In case T1_out and T2_out are both empty:
         elif not (T1_out or T2_out):
-            T1_in = [node for node in self.in_1 if node not in self.core_1]
-            T2_in = [node for node in self.in_2 if node not in self.core_2]
+            T1_in = sorted([node for node in self.in_1 if node not in self.core_1])
+            T2_in = sorted([node for node in self.in_2 if node not in self.core_2])
+            #t1os = sorted(T1_in)
 
             # If T1_in and T2_in contain nodes:
-            # P(s) = T1_out x min (T2_out)
+            # P(s) = T1_in x min (T2_in)
             if T1_in and T2_in:
                 #print("t1 and t2")
                 #node_2 = min(T2_in, key=min_key)
-                for node_2 in T2_in:
-                    for node_1 in T1_in:
-                        if self.label_match(node_1, node_2):
-                            pair = tuple((node_1, node_2))
+                for node_2i in T2_in:
+                    for node_1i in T1_in:
+                        if self.label_match(node_1i, node_2i):
+                            pair = tuple((node_1i, node_2i))
                             yield pair
                 else:
                     yield None
@@ -150,14 +150,16 @@ class DirGraphAlign(object):
                 #print("all empty")
                 #node_2 = min(G2_nodes - set(self.core_2), key=min_key)
                 #Ps = list(G2_nodes - set(self.core_2))
-                for node_2 in self.G2_nodes:
+                all_g2 = sorted([node for node in G2_nodes if node not in self.core_2])
+                all_g1 = sorted([node for node in G1_nodes if node not in self.core_1])
+                for node_2 in all_g2:
                     if node_2 not in self.core_2:
                 #node_2 = alterantive function?
-                        for node_1 in G1_nodes:
-                            if node_1 not in self.core_1:
-                                if self.label_match(node_1, node_2):
-                                    pair = tuple((node_1, node_2))
-                                    yield pair
+                        for node_1 in all_g1:
+                            #if node_1 not in self.core_1:
+                            if self.label_match(node_1, node_2):
+                                pair = tuple((node_1, node_2))
+                                yield pair
                 else:
                     yield None
             else:
@@ -181,7 +183,6 @@ class DirGraphAlign(object):
                 G2_node = None
                 #print(len(self.core_1))
                 if len(self.core_1) < self.current_max_len:
-                    #if len(self.core_1) != 0:
                     self.state.restore()
                     yield 0
                 elif len(self.core_1) != 0:
@@ -886,6 +887,7 @@ class VF2_GraphAligner(object):
                     else:
                         alreadyMatched.append(mapping[node])
                     G1.nodes[node]['Matches'] = alreadyMatched
+
                 else:
                     matched_nodes = []
                     if 'Matches' in G2.nodes[mapping[node]]:
@@ -895,6 +897,10 @@ class VF2_GraphAligner(object):
                     else:
                         matched_nodes.extend([node, mapping[node]])
                     G1.nodes[node]['Matches'] = matched_nodes
+                if "None" in G1.nodes[node]['Matches']:
+                    print(mapping)
+                    print("Stop")
+                    print("blabla")
 
 
                 #for listing of node labels
@@ -954,6 +960,10 @@ class VF2_GraphAligner(object):
                 labellist = ['-']*(maplen-1)
                 labellist.append(G2.nodes[node2]['Label'])
                 G2.nodes[node2]['Labelmatches'] = labellist
+            if "None" in G2.nodes[node]['Matches']:
+                print(mapping)
+                print("Stop")
+                print("blabla")
 
     def add_matches_to_edges(self, mapping, G1, G2):
         """Add matched edges to edges of input graphs.
@@ -1118,6 +1128,7 @@ class VF2_GraphAligner(object):
         plt.title(drawing_order)
         plt.axis('off')
         plt.savefig(file, dpi=300)
+        plt.show()
         plt.clf()
 
     def report_score(self):
