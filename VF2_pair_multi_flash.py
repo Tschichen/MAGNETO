@@ -960,10 +960,7 @@ class VF2_GraphAligner(object):
                 labellist = ['-']*(maplen-1)
                 labellist.append(G2.nodes[node2]['Label'])
                 G2.nodes[node2]['Labelmatches'] = labellist
-            if "None" in G2.nodes[node]['Matches']:
-                print(mapping)
-                print("Stop")
-                print("blabla")
+
 
     def add_matches_to_edges(self, mapping, G1, G2):
         """Add matched edges to edges of input graphs.
@@ -1128,7 +1125,6 @@ class VF2_GraphAligner(object):
         plt.title(drawing_order)
         plt.axis('off')
         plt.savefig(file, dpi=300)
-        plt.show()
         plt.clf()
 
     def report_score(self):
