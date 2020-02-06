@@ -284,9 +284,9 @@ def main(argv):
                     if node[1]['Label'] == '1':
                         h_nodes.append(node[0])
                 graphen[graph].remove_nodes_from(h_nodes)
-            print('Filtered Hydroxygen')
+            print('Filtered Hydrogen')
         else:
-            print("Graphs are not labelled, can't filter for Hydroxygen")        
+            print("Graphs are not labelled, can't filter for Hydrogen")        
 
     '''pairwise Alignment and Scoring'''
 
