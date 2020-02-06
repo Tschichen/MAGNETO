@@ -55,7 +55,7 @@ def main(argv):
             print("-o <name>\t\t\tdefine name for the current aligment run. MANDATORY OPTION!")
             print(
                 "-c <input file>\t\t\tinput a graph file as an anchor for alignment. This graph needs to be common to all graphs that are to be aligned and acts as a basis to the alignment")
-            print("-H\t\t\t\tremoves hydroxygen molecules from input graphs. Or in general nodes labelled '1'")
+            print("-H\t\t\t\tremoves hydrogen molecules from input graphs. Or in general nodes labelled '1'")
             print()
             print("ALIGNMENT OPTIONS")
             print(
