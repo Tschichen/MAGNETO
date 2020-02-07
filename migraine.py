@@ -208,13 +208,13 @@ def main(argv):
         graphs = []
         js_graphs = []
         ml_graphs = []
-    for i in range(len(singlegraph)):
-        if singlegraph[i].endswith('.graph'):
-            graphs.append(singlegraph[i])
-        elif singlegraph[i].endswith('.json'):
-            js_graphs.append(singlegraph[i])
-        elif singlegraph[i].endswith('.graphml'):
-            ml_graphs.append(singlegraph[i])
+        for i in range(len(singlegraph)):
+            if singlegraph[i].endswith('.graph'):
+                graphs.append(singlegraph[i])
+            elif singlegraph[i].endswith('.json'):
+                js_graphs.append(singlegraph[i])
+            elif singlegraph[i].endswith('.graphml'):
+                ml_graphs.append(singlegraph[i])
 
     graphen = {}
     all_graphs = []
