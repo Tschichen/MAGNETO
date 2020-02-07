@@ -10,7 +10,7 @@ import os
 from GraphIO import GraphIO
 import guide_tree as gt
 import matching as mt
-import VF2_pair_multi_flash as vf
+import vf2_eleganter as vf
 import keep
 import Clique
 import graph_gen as gg
