@@ -207,7 +207,7 @@ class DirGraphAlign(object):
                         else:
                             yield None
 
-                else:
+                elif (len(self.core_2) != len(G2_nodes)):
                     all_g2 = sorted([node for node in G2_nodes if node not in self.core_2])
                     all_g1 = sorted([node for node in G1_nodes if node not in self.core_1])
 
@@ -222,6 +222,8 @@ class DirGraphAlign(object):
                                 yield pair
                         else:
                             yield None
+                else:
+                    yield None
         else:
             T1_inout = sorted([node for node in G1_nodes if (node in self.inout_1) and (node not in self.core_1)])
             T2_inout = sorted([node for node in G2_nodes if (node in self.inout_2) and (node not in self.core_2)])
@@ -241,7 +243,7 @@ class DirGraphAlign(object):
                     else:
                         yield None
 
-            else:
+            elif (len(self.core_2) != len(G2_nodes)):
                 all_g2 = sorted([node for node in G2_nodes if node not in self.core_2])
                 all_g1 = sorted([node for node in G1_nodes if node not in self.core_1])
 
@@ -256,6 +258,8 @@ class DirGraphAlign(object):
                             yield pair
                     else:
                         yield None
+            else:
+                yield None
 
     def no_lone_node(self, nodeset1, nodeset2):
         for node2 in nodeset2:
