@@ -28,7 +28,7 @@ def main(argv):
 
     # Catch some Exceptions for bad user input.
     try:
-        opts, args = getopt.getopt(argv, "hi:o:c:n:rts:bqg:m:dvfH",
+        opts, args = getopt.getopt(argv, "hi:o:c:n:rts:bqg:m:dvfHp:",
                                    ["help", "bronkerbosch", "score=", "labelling=", "newick=", "randomt", "showt",
                                     "savetn", "drawm", "graphgen", "forbidden"])
 
@@ -88,7 +88,7 @@ def main(argv):
             print("Note: Clique option only available for BK. Disconnected directed graphs can only be assessed via BK algorithm. Input graphs must be all directed or undirected.")
             exit()
 
-        if '-i' not in all_opts:
+        if '-i' not in all_opts and '-p' not in all_opts:
             print("Please specify the location where your graph files are stored using -i <location>.")
             exit()
 
@@ -106,6 +106,24 @@ def main(argv):
                     graph_loc = arg + "\\"
                 else:
                     graph_loc = arg + "/"
+
+        if opt == '-p':
+            if sys.platform == "win32":
+                windows = True
+
+            graphs = arg.split('%')
+            for i in range(len(graphs)):
+                singlegraph = []
+                singlegraph.append(graphs[i])
+            if not windows:
+                graph_loc_list = arg[0].split('/')
+                graph_loc_list.pop()
+                graph_loc = '/'.join(graph_loc_list) + '/'
+            else:
+                graph_loc_list = arg[0].split('\\')
+                graph_loc_list.pop()
+                graph_loc = '\\'.join(graph_loc_list) + '\\'
+
 
         if opt == '-o':
             name = arg
@@ -178,13 +196,25 @@ def main(argv):
     '''parse all Graph files in Location'''
 
     # Get all graph file paths.
-    try:
-        graphs = glob.glob(graph_loc + "*.graph")
-        js_graphs = glob.glob(graph_loc + "*.json")
-        ml_graphs = glob.glob(graph_loc + "*.graphml")
-    except:
-        print("Input Error, check command line!")
-        exit()
+    if not '-p' in all_opts:
+        try:
+            graphs = glob.glob(graph_loc + "*.graph")
+            js_graphs = glob.glob(graph_loc + "*.json")
+            ml_graphs = glob.glob(graph_loc + "*.graphml")
+        except:
+            print("Input Error, check command line!")
+            exit()
+    else:
+        graphs = []
+        js_graphs = []
+        ml_graphs = []
+    for i in range(len(singlegraph)):
+        if singlegraph[i].endswith('.graph'):
+            graphs.append(singlegraph[i])
+        elif singlegraph[i].endswith('.json'):
+            js_graphs.append(singlegraph[i])
+        elif singlegraph[i].endswith('.graphml'):
+            ml_graphs.append(singlegraph[i])
 
     graphen = {}
     all_graphs = []
