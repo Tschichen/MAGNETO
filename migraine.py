@@ -112,8 +112,9 @@ def main(argv):
                 windows = True
 
             graphs = arg.split('%')
+            singlegraph = []
             for i in range(len(graphs)):
-                singlegraph = []
+
                 singlegraph.append(graphs[i])
             if not windows:
                 graph_loc_list = arg[0].split('/')
