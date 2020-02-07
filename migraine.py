@@ -10,7 +10,7 @@ import os
 from GraphIO import GraphIO
 import guide_tree as gt
 import matching as mt
-import VF2_pair_multi_flash as vf
+import vf2_eleganter as vf
 import keep
 import Clique
 import graph_gen as gg
@@ -28,7 +28,7 @@ def main(argv):
 
     # Catch some Exceptions for bad user input.
     try:
-        opts, args = getopt.getopt(argv, "hi:o:c:n:rts:bqg:m:dvfH",
+        opts, args = getopt.getopt(argv, "hi:o:c:n:rts:bqg:m:dvfHp:",
                                    ["help", "bronkerbosch", "score=", "labelling=", "newick=", "randomt", "showt",
                                     "savetn", "drawm", "graphgen", "forbidden"])
 
@@ -55,7 +55,7 @@ def main(argv):
             print("-o <name>\t\t\tdefine name for the current aligment run. MANDATORY OPTION!")
             print(
                 "-c <input file>\t\t\tinput a graph file as an anchor for alignment. This graph needs to be common to all graphs that are to be aligned and acts as a basis to the alignment")
-            print("-H\t\t\t\tremoves hydroxygen molecules from input graphs. Or in general nodes labelled '1'")
+            print("-H\t\t\t\tremoves hydrogen molecules from input graphs. Or in general nodes labelled '1'")
             print()
             print("ALIGNMENT OPTIONS")
             print(
@@ -88,7 +88,7 @@ def main(argv):
             print("Note: Clique option only available for BK. Disconnected directed graphs can only be assessed via BK algorithm. Input graphs must be all directed or undirected.")
             exit()
 
-        if '-i' not in all_opts:
+        if '-i' not in all_opts and '-p' not in all_opts:
             print("Please specify the location where your graph files are stored using -i <location>.")
             exit()
 
@@ -106,6 +106,25 @@ def main(argv):
                     graph_loc = arg + "\\"
                 else:
                     graph_loc = arg + "/"
+
+        if opt == '-p':
+            if sys.platform == "win32":
+                windows = True
+
+            graphs = arg.split('%')
+            singlegraph = []
+            for i in range(len(graphs)):
+
+                singlegraph.append(graphs[i])
+            if not windows:
+                graph_loc_list = arg[0].split('/')
+                graph_loc_list.pop()
+                graph_loc = '/'.join(graph_loc_list) + '/'
+            else:
+                graph_loc_list = arg[0].split('\\')
+                graph_loc_list.pop()
+                graph_loc = '\\'.join(graph_loc_list) + '\\'
+
 
         if opt == '-o':
             name = arg
@@ -178,13 +197,25 @@ def main(argv):
     '''parse all Graph files in Location'''
 
     # Get all graph file paths.
-    try:
-        graphs = glob.glob(graph_loc + "*.graph")
-        js_graphs = glob.glob(graph_loc + "*.json")
-        ml_graphs = glob.glob(graph_loc + "*.graphml")
-    except:
-        print("Input Error, check command line!")
-        exit()
+    if not '-p' in all_opts:
+        try:
+            graphs = glob.glob(graph_loc + "*.graph")
+            js_graphs = glob.glob(graph_loc + "*.json")
+            ml_graphs = glob.glob(graph_loc + "*.graphml")
+        except:
+            print("Input Error, check command line!")
+            exit()
+    else:
+        graphs = []
+        js_graphs = []
+        ml_graphs = []
+        for i in range(len(singlegraph)):
+            if singlegraph[i].endswith('.graph'):
+                graphs.append(singlegraph[i])
+            elif singlegraph[i].endswith('.json'):
+                js_graphs.append(singlegraph[i])
+            elif singlegraph[i].endswith('.graphml'):
+                ml_graphs.append(singlegraph[i])
 
     graphen = {}
     all_graphs = []
@@ -284,9 +315,9 @@ def main(argv):
                     if node[1]['Label'] == '1':
                         h_nodes.append(node[0])
                 graphen[graph].remove_nodes_from(h_nodes)
-            print('Filtered Hydroxygen')
+            print('Filtered Hydrogen')
         else:
-            print("Graphs are not labelled, can't filter for Hydroxygen")        
+            print("Graphs are not labelled, can't filter for Hydrogen")        
 
     '''pairwise Alignment and Scoring'''
 

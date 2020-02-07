@@ -3,6 +3,9 @@ MIGRAINE = MultIple GRaph AlIgNmEnt tool via Bron Kerbosch and VF2 algorithms
 
 ![title](https://github.com/Tschichen/MIGRAINE/blob/master/pictures/CF2708A0-5EB2-48E4-B90E-1A8B449FC132.jpeg "title picture")
 
+## Remarks for practical course
+There is now an option to remove all hydrogen from the chemical graphs. Type -H to use it. Speeds up the algorithms.
+
 ## General description
 A python3-based tool that takes multiple graph objects and aligns them in a progressive way using either Bron-Kerbosch or VF2 algorithm.
   * Input:
@@ -48,7 +51,8 @@ option| explanation
 -o <name> | Name your current run. A directory with that name will be generated in your current location and all outputfiles will be saved there. **Mandatory Option!**
 -b or --bronkerbosch | As the tool uses VF2 algorithm by default, use this parameter to switch to using Bron Kerbosch algorithm.
 -v | random pivoting strategy for bk algorithm. Combination with pre-clique option is excluded. _Default: costum pivoting._
--c <graph-file> | Clique-option: Uses the specified graph-file as anchor for Bron Kerbosch. Checks if clique is in all graphs that are to be aligned and starts multiple alignment from pre-defined clique. Input is possible in all three formats. _Only works with Bron Kerbosch._	
+-c <graph-file> | Clique-option: Uses the specified graph-file as anchor for Bron Kerbosch. Checks if clique is in all graphs that are to be aligned and starts multiple alignment from pre-defined clique. Input is possible in all three formats. _Only works with Bron Kerbosch._
+-H | Option to filter hydrogen from chemical graphs
 -s or --score <file.txt> | Allows to input a matrix of scores for node and edge labels. Check the bottom of this file for format example. _Default: If no scoring list is given, the score of an alignment is generated via the size of the largest mapping._
 -f or --forbidden |	while inputting a scoring list, score via size of largest common subgraph after excluding forbidden label matches.
 -g or --labelling <string> | String can be "nodes", "edges" or "both". Defines what labels should be used for scoring.
