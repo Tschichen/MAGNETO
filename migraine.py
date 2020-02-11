@@ -30,7 +30,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hi:o:c:n:rts:bqg:m:dvfHp:",
                                    ["help", "bronkerbosch", "score=", "labelling=", "newick=", "randomt", "showt",
-                                    "savetn", "drawm", "graphgen", "forbidden"])
+                                    "savetn", "drawm", "graphgen", "forbidden", "opt"])
 
         all_opts = [x[:][0] for x in opts]
 
@@ -60,7 +60,8 @@ def main(argv):
             print("ALIGNMENT OPTIONS")
             print(
                 "-b or --bronkerbosch\t\tswitches to multiple alignment via the Bron-Kerbosch algorithm. Default: VF2")
-            print("-v\t\t\t\twhen Bron Kerbosch is activated, uses a random pivot element (Note: not usable with clique and scoring options)")
+            print(
+                "-v\t\t\t\twhen Bron Kerbosch is activated, uses a random pivot element (Note: not usable with clique and scoring options)")
             print(
                 "-s or --score <input file>\tinput a list of scores for matching node labels, edge labels or both. Default: Scoring based on the size of the largest common subgraph found between two graphs")
             print(
@@ -85,7 +86,8 @@ def main(argv):
             print(
                 "--graphgen\t\t\ta tool, that makes random graphs with properties that are set through user input")
             print()
-            print("Note: Clique option only available for BK. Disconnected directed graphs can only be assessed via BK algorithm. Input graphs must be all directed or undirected.")
+            print(
+                "Note: Clique option only available for BK. Disconnected directed graphs can only be assessed via BK algorithm. Input graphs must be all directed or undirected.")
             exit()
 
         if '-i' not in all_opts and '-p' not in all_opts:
@@ -114,7 +116,6 @@ def main(argv):
             graphs = arg.split('%')
             singlegraph = []
             for i in range(len(graphs)):
-
                 singlegraph.append(graphs[i])
             if not windows:
                 graph_loc_list = arg[0].split('/')
@@ -124,7 +125,6 @@ def main(argv):
                 graph_loc_list = arg[0].split('\\')
                 graph_loc_list.pop()
                 graph_loc = '\\'.join(graph_loc_list) + '\\'
-
 
         if opt == '-o':
             name = arg
@@ -153,7 +153,7 @@ def main(argv):
                 exit()
             pre_clique = True
             if arg.endswith('graph'):
-                clique = GraphIO.parse_file(arg,'clique_temp')
+                clique = GraphIO.parse_file(arg, 'clique_temp')
             elif arg.endswith('json'):
                 clique = GraphIO.parse_json_pubchem(arg)
             elif arg.endswith('graphml'):
@@ -263,19 +263,18 @@ def main(argv):
         print("Too few graphs in directory! " + str(len(all_graphs)) + " graphs in " + graph_loc)
         exit()
 
-
-    #Check if graphs are all directed or undirected.
+    # Check if graphs are all directed or undirected.
     directed_graphs = []
     for i in all_graphs:
         if graphen[i].is_directed:
             directed_graphs.append(i)
 
     if (len(directed_graphs) != 0) and (len(directed_graphs) != len(all_graphs)):
-        print("Graphs are inconsistent in directed and undirected attribute. Please check input and only use graphs that are undirected or directed!")
+        print(
+            "Graphs are inconsistent in directed and undirected attribute. Please check input and only use graphs that are undirected or directed!")
         print("Those graphs are directed:")
         print(directed_graphs)
         exit()
-
 
     # Check if graphs are consistent in labelling.
     node_labels = []
@@ -305,9 +304,9 @@ def main(argv):
                 print("Warning! Some of your graphs have labeled edges, some don't.")
                 break
         edges_labelled = False
-        
+
     if "-H" in all_opts:
-        a = nx.get_node_attributes(graphen[all_graphs[0]],"Label")
+        a = nx.get_node_attributes(graphen[all_graphs[0]], "Label")
         if list(a.items())[0][1] != None:
             for graph in all_graphs:
                 h_nodes = []
@@ -317,14 +316,12 @@ def main(argv):
                 graphen[graph].remove_nodes_from(h_nodes)
             print('Filtered Hydrogen')
         else:
-            print("Graphs are not labelled, can't filter for Hydrogen")        
+            print("Graphs are not labelled, can't filter for Hydrogen")
 
     '''pairwise Alignment and Scoring'''
 
     print("Multiple Graph Alignment: " + name)
     print("Alignment: " + ", ".join(all_graphs))
-
-
 
     # If a clique is pre-defined all graphs need to be checked if clique is in them. Else return graph that does not have clique.
     if pre_clique == True:
@@ -372,7 +369,7 @@ def main(argv):
             for i in range(len(all_graphs)):
                 matcher = mt.Matching(graphen[all_graphs[i]])
                 for j in range(i + 1, len(all_graphs)):
-                # Evaluate pairwise scores via Bron Kerbosch.
+                    # Evaluate pairwise scores via Bron Kerbosch.
                     obj = mt.Matching(graphen[all_graphs[j]])
                     h = matcher.modular_product(obj)
                     if h == -1:
@@ -436,6 +433,7 @@ def main(argv):
                         aligner = vf.VF2_GraphAligner(graph_list, None, user_list_scores[0], user_list_scores[1])
                     else:
                         aligner = vf.VF2_GraphAligner(graph_list)
+
 
                     m = aligner.vf2_pga(forbidden)
                     if not user_list_scores or forbidden:
@@ -684,6 +682,36 @@ def main(argv):
         matches = path + name + "_matches.txt"
         GraphIO.write_matches(m.network, matches)
 
+        if '--opt' in all_opts:
+            tetra = m.network.copy()
+            to_remove = []
+            for i in m.network.nodes(data=True):
+                if None in i[1]['Matches']:
+                    to_remove.append(i[0])
+
+            tetra.remove_nodes_from(to_remove)
+
+            mlopt_path = path + name + "_optimal_matching.graphml"
+            GraphIO.write_graphML_file(tetra, mlopt_path)
+            print("Saved Optimal Matching as Graphml")
+
+            optmatches = path + name + "_opt_matches.txt"
+            GraphIO.write_matches(tetra, optmatches)
+
+
+            if '-d' in all_opts or '--drawm' in all_opts:
+                tetra2 = tetra.copy()
+                tetra_matching = mt.Matching(tetra)
+
+                for i in tetra2.nodes(data=True):
+                    tetra_matching.network.nodes[i[0]]['Matches'] = i[1]['Matches']
+                png_matching = path + name + "_opt_matching.png"
+                if nodes_labelled:
+                    tetra_matching.draw_matching(drawing_order, "label", png_matching)
+                else:
+                    tetra_matching.draw_matching(drawing_order, "nolabel", png_matching)
+                print("Saved Optimal Matching as PNG")
+
 
     # Multiple Graph Alignment via VF2.
     else:
@@ -705,10 +733,10 @@ def main(argv):
 
             if save_graphs != "end":
                 all_matchings = path + name + "_matching"
-                mga = multiple_aligner.vf2mult(save_graphs, all_matchings,forbidden=forbidden)
+                mga = multiple_aligner.vf2mult(save_graphs, all_matchings, forbidden=forbidden)
 
             else:
-                mga = multiple_aligner.vf2mult(save_graphs,forbidden=forbidden)
+                mga = multiple_aligner.vf2mult(save_graphs, forbidden=forbidden)
 
             # Save final graph alignment as GRAPHML file.
             GraphIO.write_graphML_file(mga, ml_path)
@@ -729,8 +757,32 @@ def main(argv):
             if '-n' in all_opts:
                 print("Error! Can't create Multiple Alignment. Check if tree corresponds to input graphs.")
                 exit()
-                
+
         time_vf2_mult = time.time() - time_vf22
+        if '--opt' in all_opts:
+            tetra = mga.copy()
+            to_remove = []
+            for i in mga.nodes(data=True):
+                if '-' in i[1]['Matches']:
+                    to_remove.append(i[0])
+
+            tetra.remove_nodes_from(to_remove)
+
+            mlopt_path = path + name + "_optimal_matching.graphml"
+            GraphIO.write_graphML_file(tetra, mlopt_path)
+            print("Saved Optimal Matching as Graphml")
+
+            optmatches = path + name + "_opt_matches.txt"
+            GraphIO.write_matches(tetra, optmatches)
+
+            if '-d' in all_opts or '--drawm' in all_opts:
+                png_matching = path + name + "_opt_matching.png"
+                if nodes_labelled:
+                    multiple_aligner.output_generator(tetra, drawing_order, "label", png_matching)
+                else:
+                    multiple_aligner.output_generator(tetra, drawing_order, "nolabel", png_matching)
+                print("Saved Optimal Matching as PNG")
+
 
     # Benchmarking.
     if vf2:
@@ -738,7 +790,7 @@ def main(argv):
         print("Graph aligment used up a total time of: " + str(total) + " s.")
     else:
         total = time_bk_paar + time_bk_mult
-        print("Graphs aligment used up a total time of: " +str(total) + " s.")
+        print("Graphs aligment used up a total time of: " + str(total) + " s.")
 
     benchm = path + name
 
