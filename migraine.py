@@ -706,7 +706,7 @@ def main(argv):
                 for i in tetra2.nodes(data=True):
                     tetra_matching.network.nodes[i[0]]['Matches'] = i[1]['Matches']
                 for j in tetra2.edges(data=True):
-                    tetra_matching.network.edges[j[0]]['Matches'] = i[1]['Matches']
+                    tetra_matching.network.edges[j[0]]['Matches'] = j[1]['Matches']
                 png_matching = path + name + "_opt_matching.png"
                 if nodes_labelled:
                     tetra_matching.draw_matching(drawing_order, "label", png_matching)
