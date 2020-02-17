@@ -4,8 +4,8 @@ MIGRAINE = MultIple GRaph AlIgNmEnt tool via Bron Kerbosch and VF2 algorithms
 ![title](https://github.com/Tschichen/MIGRAINE/blob/master/pictures/CF2708A0-5EB2-48E4-B90E-1A8B449FC132.jpeg "title picture")
 
 ## Remarks for practical course
-There is now an option to remove all hydrogen from the chemical graphs. Type -H to use it. Speeds up the algorithms.
-New option --opt will give you an additional output, only showing the perfectly matched subgraph without suboptimals.
+* There is now an option to remove all hydrogen from the chemical graphs. Type -H to use it. Speeds up the algorithms.
+* New option --opt will give you an additional output, only showing the perfectly matched subgraph without suboptimals.
 
 ## General description
 A python3-based tool that takes multiple graph objects and aligns them in a progressive way using either Bron-Kerbosch or VF2 algorithm.
