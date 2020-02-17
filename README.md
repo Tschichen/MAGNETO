@@ -5,6 +5,7 @@ MIGRAINE = MultIple GRaph AlIgNmEnt tool via Bron Kerbosch and VF2 algorithms
 
 ## Remarks for practical course
 There is now an option to remove all hydrogen from the chemical graphs. Type -H to use it. Speeds up the algorithms.
+New option --opt will give you an additional output, only showing the perfectly matched subgraph without suboptimals.
 
 ## General description
 A python3-based tool that takes multiple graph objects and aligns them in a progressive way using either Bron-Kerbosch or VF2 algorithm.
@@ -62,6 +63,8 @@ option| explanation
 -q or --savetn | saves the generated guide tree as newick file
 -m <string> | saves the multiple alignment as GRAPHML file. Options for string are: "end" only end result will be saved, "all" saves every matching after one graph is added to the alignment till the end. _Default: end_
 -d or --drawm | saves a visualization of the multiple graph alignment as .png
+--opt | will provide an additional output, only showing the perfectly matched subgraph without suboptimals.
+
 
 	
 ## Required Python libraries
