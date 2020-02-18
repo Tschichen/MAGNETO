@@ -311,7 +311,7 @@ def main(argv):
             for graph in all_graphs:
                 h_nodes = []
                 for node in graphen[graph].nodes(data=True):
-                    if node[1]['Label'] == '1':
+                    if node[1]['Label'] == '1' or node[1]['Label'] == 'H':
                         h_nodes.append(node[0])
                 graphen[graph].remove_nodes_from(h_nodes)
             print('Filtered Hydrogen')
