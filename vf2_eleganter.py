@@ -118,7 +118,9 @@ class DirGraphAlign(object):
 
     def matcher(self):
         if len(self.mapping) == len(self.G2.nodes):
-            yield self.mapping
+            if self.evalNodeAttr:
+                self.score = self.counting
+                yield tuple((self.score, self.mapping))
         for x in self.cand_iter():
             if x == None:
                 G1_node = None
@@ -148,25 +150,7 @@ class DirGraphAlign(object):
                     if self.evalNodeAttr and not self.forbidden:
                         self.counting += self.score_pair(G1_node, G2_node)
                     for alig in self.matcher():
-                        #print(len(self.core_1))
                         yield alig
-                        #ab hier weg?
-        #if len(self.core_1) != 0 and len(self.core_1) >= self.current_max_len:
-            #self.mapping = self.core_1.copy()
-            #self.current_max_len = len(self.mapping)
-            #if self.evalNodeAttr:
-                #self.score = self.counting
-                #print(self.state.depth)
-               #self.state.restore()
-               #print (self.state.depth)
-                #yield tuple((self.score, self.mapping))
-            #else:
-                #print(self.state.depth)
-                #self.state.restore()
-                #print(self.state.depth)
-                #yield self.mapping
-        #else:
-            #self.state.restore()
 
     def cand_iter(self):
         G1_nodes = self.G1_nodes
@@ -175,7 +159,7 @@ class DirGraphAlign(object):
 
         if self.G1.is_directed():
             T1_out = sorted([node for node in self.out_1 if node not in self.core_1])
-            T2_out = sorted([node for node in self.out_2 if node not in self.core_2])
+            T2_out = sorted([node for node in self.out_2 if node not in self.core_2], key=lambda kgrad: kgrad[1], reverse=True)
 
             if T1_out and T2_out:
                 if self.node_score_list:
@@ -192,7 +176,7 @@ class DirGraphAlign(object):
 
             elif not (T1_out or T2_out):
                 T1_in = sorted([node for node in self.in_1 if node not in self.core_1])
-                T2_in = sorted([node for node in self.in_2 if node not in self.core_2])
+                T2_in = sorted([node for node in self.in_2 if node not in self.core_2],key=lambda kgrad: kgrad[1], reverse=True)
 
                 if T1_in and T2_in:
                     if self.node_score_list:
@@ -208,7 +192,7 @@ class DirGraphAlign(object):
                             yield None
 
                 elif (len(self.core_2) != len(G2_nodes)):
-                    all_g2 = sorted([node for node in G2_nodes if node not in self.core_2])
+                    all_g2 = sorted([node for node in G2_nodes if node not in self.core_2],key=lambda kgrad: kgrad[1], reverse=True)
                     all_g1 = sorted([node for node in G1_nodes if node not in self.core_1])
 
                     if self.node_score_list:
@@ -226,7 +210,7 @@ class DirGraphAlign(object):
                     yield None
         else:
             T1_inout = sorted([node for node in G1_nodes if (node in self.inout_1) and (node not in self.core_1)])
-            T2_inout = sorted([node for node in G2_nodes if (node in self.inout_2) and (node not in self.core_2)])
+            T2_inout = sorted([node for node in G2_nodes if (node in self.inout_2) and (node not in self.core_2)],key=lambda kgrad: kgrad[1], reverse=True)
 
             # If T1_inout and T2_inout are both nonempty.
             # P(s) = T1_inout x {min T2_inout}
@@ -242,22 +226,29 @@ class DirGraphAlign(object):
                             yield pair
                     else:
                         yield None
-
-            elif (len(self.core_2) != len(G2_nodes)):
-                all_g2 = sorted([node for node in G2_nodes if node not in self.core_2])
-                all_g1 = sorted([node for node in G1_nodes if node not in self.core_1])
-
-                if self.node_score_list:
-                    node_2 = self.no_lone_node(all_g1, all_g2)
                 else:
-                    node_2 = all_g2[0]
-                if node_2 is not None:
-                    for node_1 in all_g1:
-                        if self.label_match(node_1, node_2):
-                            pair = tuple((node_1, node_2))
-                            yield pair
+                    yield None
+
+            elif not any ((T1_inout, T2_inout)):
+                if (len(self.core_2) != len(G2_nodes)):
+                    all_g2 = sorted([node for node in G2_nodes if node not in self.core_2], key=lambda kgrad: kgrad[1], reverse=True)
+                    all_g1 = sorted([node for node in G1_nodes if node not in self.core_1])
+
+                    if self.node_score_list:
+                        node_2 = self.no_lone_node(all_g1, all_g2)
+                    else:
+                        node_2 = all_g2[0]
+                    if node_2 is not None:
+                        for node_1 in all_g1:
+                            if self.label_match(node_1, node_2):
+                                pair = tuple((node_1, node_2))
+                                yield pair
+                        else:
+                            yield None
                     else:
                         yield None
+                else:
+                    yield None
             else:
                 yield None
 
@@ -631,7 +622,7 @@ class MappingState(object):
                         del vector[node]
 
             # counter is reset to value before adding the pair
-            if self.GM.evalNodeAttr and not self.GM.forbidden:
+            if self.GM.node_score_list and not self.GM.forbidden:
                 self.GM.counting -= self.GM.score_pair(self.G1_node, self.G2_node)
         else:
             for vector in (self.GM.inout_1, self.GM.inout_2):
