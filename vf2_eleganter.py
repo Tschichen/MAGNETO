@@ -118,9 +118,9 @@ class DirGraphAlign(object):
 
     def matcher(self):
         if len(self.mapping) == len(self.G2.nodes):
-            if self.evalNodeAttr:
-                self.score = self.counting
-                yield tuple((self.score, self.mapping))
+            #if self.evalNodeAttr:
+            self.score = self.counting
+            yield tuple((self.score, self.mapping))
         for x in self.cand_iter():
             if x == None:
                 G1_node = None
@@ -131,13 +131,13 @@ class DirGraphAlign(object):
                 elif len(self.core_1) != 0:
                     self.mapping = self.core_1.copy()
                     self.current_max_len = len(self.mapping)
-                    if self.evalNodeAttr:
-                        self.score = self.counting
-                        self.state.restore()
-                        yield tuple((self.score, self.mapping))
-                    else:
-                        self.state.restore()
-                        yield self.mapping
+                    #if self.evalNodeAttr:
+                    self.score = self.counting
+                    self.state.restore()
+                    yield tuple((self.score, self.mapping))
+                    # else:
+                    #     self.state.restore()
+                    #     yield self.mapping
                 else:
                     self.state.restore()
                     yield 0
@@ -147,8 +147,8 @@ class DirGraphAlign(object):
                 if self.syntactic_feas(G1_node, G2_node):
                     newstate = self.state.__class__(self, G1_node, G2_node)
                     self.state = newstate
-                    if self.evalNodeAttr and not self.forbidden:
-                        self.counting += self.score_pair(G1_node, G2_node)
+                    #if self.evalNodeAttr and not self.forbidden:
+                    self.counting += self.score_pair(G1_node, G2_node)
                     for alig in self.matcher():
                         yield alig
 
@@ -399,23 +399,35 @@ class DirGraphAlign(object):
 
     def score_pair(self, G1_node, G2_node):
         """Calculate score of matched nodes"""
-        if not self.evalNodeAttr or self.forbidden:
-            return 0
+        #if not self.evalNodeAttr or self.forbidden:
+            #return 0
         label1 = self.G1.nodes[G1_node]['Label']
         label2 = self.G2.nodes[G2_node]['Label']
-        if label1 and label2:
+        nummatch = 0
+        gap = False
+        if 'Matches' in self.G1.nodes[G1_node]:
+            matchlist = [entry for entry in self.G1.nodes[G1_node]['Matches'] if entry != G1_node]
+            for entry in matchlist:
+                if entry != None and entry != '-':
+                    nummatch +=1
+                else:
+                    gap = True
+            if gap:
+                nummatch -= 0.5
+        if label1 is not None and label2 is not None:
             for label_list in self.node_score_list:
                 if label_list[0] == label1:
                     for i in range(0, len(label_list[1])):
                         if label2 == label_list[1][i][0]:
-                            return int(label_list[1][i][1])
+                            labscore = int(label_list[1][i][1])
+                            score = labscore + nummatch
+                            return score
         else:
-            print(
-                'you have requested to evaluate node labels, but at least one label was not defined. Default score 0 is returned.')
-            return 0
+            return nummatch
 
-        print("Some labels on your graph have not been found in the scoring list. Default Score: 0")
-        return 0
+    def check_full_match(self, mapping):
+
+        pass
 
     def process_results(self, results):
         """Prune short and low-scored alignments from the result list
@@ -426,23 +438,25 @@ class DirGraphAlign(object):
         Returns
         Returns one mapping of maximal length
         """
-        if self.node_score_list and not self.forbidden:
-            max_len_alig = max(results, key=lambda x: len(x[1]))
-            cutoffScore = max_len_alig[0]
-            cutoffLen = len(max_len_alig[1])
-            pruned_Res = [result for result in results if
-                          ((len(result[1]) >= cutoffLen) and (result[0] >= cutoffScore))]
-            print('There are ' + str(len(pruned_Res)) + ' alignments with a score >= ' + str(
-                cutoffScore) + ' and a length >= ' + str(cutoffLen))
-        else:
-            pruned_Res = sorted(results, key=len, reverse=True)
-            number_of_possAligs = len(pruned_Res)
-            cutoffLen = len(pruned_Res[0])
-            for i in range(0, number_of_possAligs):
-                if (len(pruned_Res[i]) < cutoffLen):
-                    del pruned_Res[i:(number_of_possAligs + 1)]
-                    break
-            print('There are ' + str(len(pruned_Res)) + ' possible Alignments.')
+        #if self.node_score_list and not self.forbidden:
+        max_len_alig = max(results, key=lambda x: len(x[1]))
+        max_score_alig = max(results, key= lambda x: x[0])
+        cutoffScore = max_score_alig[0]
+        cutoffLen = len(max_len_alig[1])
+        print(cutoffLen)
+        pruned_Res = [result for result in results if
+                      ((len(result[1]) >= cutoffLen) and (result[0] >= cutoffScore))]
+        print('There are ' + str(len(pruned_Res)) + ' alignments with a score >= ' + str(
+            cutoffScore) + ' and a length >= ' + str(cutoffLen))
+        # else:
+        #     pruned_Res = sorted(results, key=len, reverse=True)
+        #     number_of_possAligs = len(pruned_Res)
+        #     cutoffLen = len(pruned_Res[0])
+        #     for i in range(0, number_of_possAligs):
+        #         if (len(pruned_Res[i]) < cutoffLen):
+        #             del pruned_Res[i:(number_of_possAligs + 1)]
+        #             break
+        #     print('There are ' + str(len(pruned_Res)) + ' possible Alignments.')
 
         if len(pruned_Res) > 1:
             lucky_number = random.randrange(0, len(pruned_Res))
@@ -786,30 +800,22 @@ class VF2_GraphAligner(object):
 
         """
         for edge in G1.edges():
-            try:
-                G1.edges[edge]['Label']
-            except:
+            if 'Label'not in G1.edges[edge]:
                 G1.edges[edge]['Label'] = None
             else:
                 continue
         for edge in G2.edges():
-            try:
-                G2.edges[edge]['Label']
-            except:
+            if 'Label' not in G2.edges[edge]:
                 G2.edges[edge]['Label'] = None
             else:
                 continue
         for node in G1.nodes():
-            try:
+            if 'Label'not in G1.nodes[node]:
                 G1.nodes[node]['Label']
-            except:
-                G1.nodes[node]['Label'] = None
             else:
                 continue
         for node in G2.nodes():
-            try:
-                G2.nodes[node]['Label']
-            except:
+            if 'Label'not in G2.nodes[node]:
                 G2.nodes[node]['Label'] = None
             else:
                 continue
