@@ -120,6 +120,7 @@ class DirGraphAlign(object):
         if len(self.mapping) == len(self.G2.nodes):
             #if self.evalNodeAttr:
             self.score = self.counting
+            self.check_full_match(self.mapping)
             yield tuple((self.score, self.mapping))
         for x in self.cand_iter():
             if x == None:
@@ -133,6 +134,7 @@ class DirGraphAlign(object):
                     self.current_max_len = len(self.mapping)
                     #if self.evalNodeAttr:
                     self.score = self.counting
+                    self.check_full_match(self.mapping)
                     self.state.restore()
                     yield tuple((self.score, self.mapping))
                     # else:
@@ -414,6 +416,8 @@ class DirGraphAlign(object):
                     gap = True
             if gap:
                 nummatch -= 0.5
+            else:
+                nummatch +=2
         if label1 is not None and label2 is not None:
             for label_list in self.node_score_list:
                 if label_list[0] == label1:
@@ -426,7 +430,9 @@ class DirGraphAlign(object):
             return nummatch
 
     def check_full_match(self, mapping):
-
+        for node in self.G2.nodes:
+            if node not in mapping.values():
+                self.score -=2
         pass
 
     def process_results(self, results):
