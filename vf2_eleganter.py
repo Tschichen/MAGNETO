@@ -411,28 +411,29 @@ class DirGraphAlign(object):
             matchlist = [entry for entry in self.G1.nodes[G1_node]['Matches'] if entry != G1_node]
             for entry in matchlist:
                 if entry != None and entry != '-':
-                    nummatch +=1
+                    nummatch +=2
                 else:
                     gap = True
             if gap:
                 nummatch -= 0.5
             else:
-                nummatch +=2
+                nummatch +=5
         if label1 is not None and label2 is not None:
-            for label_list in self.node_score_list:
-                if label_list[0] == label1:
-                    for i in range(0, len(label_list[1])):
-                        if label2 == label_list[1][i][0]:
-                            labscore = int(label_list[1][i][1])
-                            score = labscore + nummatch
-                            return score
+            if self.node_score_list:
+                for label_list in self.node_score_list:
+                    if label_list[0] == label1:
+                        for i in range(0, len(label_list[1])):
+                            if label2 == label_list[1][i][0]:
+                                labscore = int(label_list[1][i][1])
+                                score = labscore + nummatch
+                                return score
         else:
             return nummatch
 
     def check_full_match(self, mapping):
         for node in self.G2.nodes:
-            if node not in mapping.values():
-                self.score -=2
+            if node not in mapping.values() and self.score >= 2:
+                self.score -= 2
         pass
 
     def process_results(self, results):
@@ -466,6 +467,7 @@ class DirGraphAlign(object):
 
         if len(pruned_Res) > 1:
             lucky_number = random.randrange(0, len(pruned_Res))
+            print("Selected Matching "+ str(lucky_number))
             selected_result = pruned_Res[lucky_number]
             self.printOutput(selected_result)
             return (selected_result)
